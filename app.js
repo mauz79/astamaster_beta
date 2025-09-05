@@ -55,6 +55,13 @@ const ICONS = {
   gf: '⚽', gfr: '⚪⚽', gs: '\uD83E\uDDE4', gsr: '⚪\uD83E\uDDE4', as: '\uD83C\uDFAF', a: '\uD83D\uDFE8', e: '\uD83D\uDFE5', rp: '\uD83E\uDDF1'
 };
 
+// Tooltips per le sezioni Storico
+const SECT_TIPS = {
+  dati: 'Medie e conteggi consolidati sulle ultime stagioni',
+  perPres: 'Indicatori normalizzati rispetto alle presenze',
+  futures: 'Valori attesi (normalizzati) stimati su base storica'
+};
+
 // ===== Helpers =====
 const $ = sel => document.querySelector(sel);
 function fmtValue(v){ if(v===null||v===undefined) return '—'; const n = typeof v==='number'? v : Number(String(v).replace(',','.')); if(!Number.isFinite(n)) return String(v); return Number(n.toFixed(3)).toString(); }
@@ -129,7 +136,23 @@ function buildOptionsUI(){
   sg2?.addEventListener('change',()=>{ saveGroups({ perPres: sg1.checked, futures: sg2.checked }) });
 
   // Pulsante OK per chiudere il pannello Opzioni
-  $('#btnCloseOptions')?.addEventListener('click', ()=>{ const det=document.querySelector('details.options'); if(det) det.removeAttribute('open'); });
+  const close = ()=>{ const det=document.querySelector('details.options'); if(det) det.removeAttribute('open'); };
+  $('#btnCloseOptions')?.addEventListener('click', close);
+  $('#btnCloseOptionsTop')?.addEventListener('click', close);
+
+  // Reset impostazioni
+  $('#btnResetOptions')?.addEventListener('click', ()=>{
+    localStorage.removeItem(LS_THRESH);
+    localStorage.removeItem(LS_STO_GROUPS);
+    localStorage.removeItem(TOGGLE_KEYS.y2025);
+    localStorage.removeItem(TOGGLE_KEYS.storico);
+    localStorage.removeItem(THEME_KEY);
+    // Re-applica default
+    setupTheme();
+    applyToggles();
+    buildOptionsUI();
+    alert('Impostazioni ripristinate.');
+  });
 }
 
 // ===== Badges header (inclusi Affidabilità) =====
@@ -167,9 +190,9 @@ async function selectPlayer(cod, idx){
       const part0rows = DATI_STAT.filter(k=> (k in srec) && !HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('');
       const part1rows = groups.perPres ? PER_PRES.filter(k=> (k in srec) && !HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('') : '';
       const part2rows = groups.futures ? FUTURES.filter(k=> (k in srec) && !HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('') : '';
-      const part0 = part0rows? `<h4 class=\"sect\">Dati statistici</h4>${part0rows}` : '';
-      const part1 = part1rows? `<h4 class=\"sect\">Statistiche per presenza</h4>${part1rows}` : '';
-      const part2 = part2rows? `<h4 class=\"sect\">Futures</h4>${part2rows}` : '';
+      const part0 = part0rows? `<h4 class=\"sect\" title=\"${escapeHtml(SECT_TIPS.dati)}\">Dati statistici</h4>${part0rows}` : '';
+      const part1 = part1rows? `<h4 class=\"sect\" title=\"${escapeHtml(SECT_TIPS.perPres)}\">Statistiche per presenza</h4>${part1rows}` : '';
+      const part2 = part2rows? `<h4 class=\"sect\" title=\"${escapeHtml(SECT_TIPS.futures)}\">Futures</h4>${part2rows}` : '';
       $('#cardStorico').innerHTML = part0 + part1 + part2 || '<div class=small>Nessun dato storico da mostrare.</div>';
 
       // Nascoste = gruppi spenti

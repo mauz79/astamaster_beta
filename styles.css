@@ -27,17 +27,23 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantare
 .options summary{cursor:pointer;list-style:none;border:1px solid var(--border);border-radius:.5rem;padding:.4rem .6rem;background:var(--panel);color:var(--muted)}
 .options[open] summary{color:var(--text)}
 .options__body{position:absolute;z-index:30;right:0;top:calc(100% + 6px);width:min(560px,92vw);max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:.8rem;padding:1rem;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.options__sticky{position:sticky;top:-1px;display:flex;justify-content:flex-end;gap:.4rem;background:var(--panel);border-bottom:1px solid var(--border);padding:.4rem .2rem;margin:-1rem -1rem .6rem;-webkit-backdrop-filter:saturate(1.2);backdrop-filter:saturate(1.2)}
 .options fieldset{border:1px solid var(--border);border-radius:.6rem;padding:.8rem;margin:0 0 .8rem 0}
 .options legend{padding:0 .3rem;color:var(--muted)}
 .options .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
 .options input[type=number]{width:100px}
 .opts-groups{display:grid;gap:.6rem}
 .group-row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;border:1px solid var(--border);padding:.5rem .6rem;border-radius:.6rem}
-.opts-actions.end{display:flex;justify-content:flex-end}
+.opts-actions{display:flex;gap:.6rem;margin-top:.6rem}
+.opts-actions.between{justify-content:space-between}
 .btn{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:.5rem;padding:.4rem .8rem;cursor:pointer}
+.btn.sm{font-size:.82rem;padding:.2rem .55rem}
 .btn:hover{filter:brightness(1.1)}
 
-@media(max-width:700px){.options__body{left:0;right:auto;width:92vw}.options .grid-2{grid-template-columns:1fr}}
+@media(max-width:700px){
+  .options[open] .options__body{position:fixed;left:0;right:0;bottom:0;top:auto;width:100vw;max-height:80vh;border-radius:12px 12px 0 0}
+  .options .grid-2{grid-template-columns:1fr}
+}
 
 .results{list-style:none;margin:.8rem 0 0;padding:0;display:grid;gap:.4rem}
 .result-item{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;background:var(--panel);border:1px solid var(--border);border-radius:.6rem;cursor:pointer}
@@ -64,6 +70,7 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantare
 .card-body{padding:1rem;display:grid;gap:.4rem}
 .expandable h3{cursor:pointer}
 .expandable.collapsed .card-body{display:none}
+.separator{margin-top:2rem;border-top:1px dashed var(--border);box-shadow:0 -8px 18px rgba(0,0,0,.18) inset}
 .small{font-size:.9rem;color:var(--muted)}
 .row{display:flex;justify-content:space-between;gap:1rem}
 .key{color:var(--muted)}

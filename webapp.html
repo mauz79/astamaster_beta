@@ -11,7 +11,7 @@
   <header class="site-header">
     <div class="container">
       <h1 class="brandline"><span class="logo-dot"></span>AstaMaster</h1>
-      <p class="subtitle">Ricerca giocatore e statistiche (2021–2025)</p>
+      <p class="subtitle">Il tuo scout personale per l'asta perfetta</p>
       <div class="toprow">
         <div class="search-box">
           <input id="searchInput" type="search" placeholder="Cerca un giocatore" autocomplete="off" inputmode="search" aria-label="Cerca un giocatore" />
@@ -30,6 +30,9 @@
           <details class="options">
             <summary>Opzioni</summary>
             <div class="options__body">
+              <div class="options__sticky">
+                <button id="btnCloseOptionsTop" type="button" class="btn sm">OK</button>
+              </div>
               <fieldset>
                 <legend>Soglie badge</legend>
                 <div class="grid-2">
@@ -52,7 +55,8 @@
                   </div>
                 </div>
               </fieldset>
-              <div class="opts-actions end">
+              <div class="opts-actions between">
+                <button id="btnResetOptions" type="button" class="btn">Reset impostazioni</button>
                 <button id="btnCloseOptions" type="button" class="btn">OK</button>
               </div>
             </div>
@@ -93,7 +97,7 @@
           </div>
         </div>
 
-        <div id="wrapHidden" class="card expandable collapsed">
+        <div id="wrapHidden" class="card expandable collapsed separator">
           <h3>Nascoste</h3>
           <div id="cardHidden" class="card-body"></div>
         </div>
@@ -103,7 +107,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="container small">Static web app · GitHub Pages ready</div>
+    <div class="container small">AstaMaster è sviluppato da <strong>mauz79</strong> per <strong>Lega Fantacalcio AlterLega</strong></div>
   </footer>
 
   <noscript>Per usare questa web app attiva JavaScript nel browser.</noscript>
