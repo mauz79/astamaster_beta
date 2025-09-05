@@ -18,8 +18,9 @@
           <span class="kbd" title="Scorciatoia">Ctrl/⌘ K</span>
         </div>
         <div class="view-toggles">
-          <label><input type="checkbox" id="toggle2025" checked> 2025</label>
-          <label><input type="checkbox" id="toggleStorico" checked> Storico</label>
+          <label class="switch"><input type="checkbox" id="switch2025" checked><span class="slider"></span><span class="switch-text">2025</span></label>
+          <label class="switch"><input type="checkbox" id="switchStorico" checked><span class="slider"></span><span class="switch-text">Storico</span></label>
+          <label class="switch"><input type="checkbox" id="switchTheme" checked><span class="slider"></span><span class="switch-text">Tema scuro</span></label>
           <details class="options">
             <summary>Opzioni</summary>
             <div class="options__body">
@@ -42,7 +43,6 @@
               </fieldset>
             </div>
           </details>
-          <button id="themeToggle" class="badge" type="button" aria-pressed="false" title="Cambia tema">Tema</button>
         </div>
       </div>
     </div>
@@ -74,12 +74,16 @@
             <div id="card2024" class="card-body"></div>
           </div>
           <div id="wrapStorico" class="card">
-            <h3>Storico (ultime 4)
-              <span class="tip" title="Medie e indicatori calcolati sulle ultime 4 stagioni; alcuni valori sono normalizzati (attesi)">i</span>
-            </h3>
+            <h3>Storico (ultime 4)</h3>
             <div id="cardStorico" class="card-body"></div>
           </div>
         </div>
+
+        <div id="wrapHidden" class="card expandable collapsed">
+          <h3>Nascoste</h3>
+          <div id="cardHidden" class="card-body"></div>
+        </div>
+
       </section>
     </div>
   </main>
@@ -90,14 +94,5 @@
 
   <noscript>Per usare questa web app attiva JavaScript nel browser.</noscript>
   <script src="app.js" defer></script>
-  <script>
-    (function(){
-      const root = document.documentElement; const key = 'astamaster-theme'; const btn = document.getElementById('themeToggle');
-      const apply = (mode)=>{ root.setAttribute('data-theme', mode); if(btn) btn.setAttribute('aria-pressed', String(mode==='dark')); };
-      const saved = localStorage.getItem(key);
-      if(saved==='light'||saved==='dark'){ apply(saved); } else { apply('dark'); }
-      btn && btn.addEventListener('click',()=>{ const next = (root.getAttribute('data-theme')==='dark') ? 'light' : 'dark'; apply(next); localStorage.setItem(key,next); });
-    })();
-  </script>
 </body>
 </html>
