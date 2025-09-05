@@ -10,10 +10,7 @@
 <body>
   <header class="site-header">
     <div class="container">
-      <h1 class="brandline">
-        <span class="logo-dot"></span>
-        AstaMaster
-      </h1>
+      <h1 class="brandline"><span class="logo-dot"></span>AstaMaster</h1>
       <p class="subtitle">Ricerca giocatore e statistiche (2021–2025)</p>
       <div class="toprow">
         <div class="search-box">
@@ -23,6 +20,28 @@
         <div class="view-toggles">
           <label><input type="checkbox" id="toggle2025" checked> 2025</label>
           <label><input type="checkbox" id="toggleStorico" checked> Storico</label>
+          <details class="options">
+            <summary>Opzioni</summary>
+            <div class="options__body">
+              <fieldset>
+                <legend>Soglie badge</legend>
+                <div class="grid-2">
+                  <label>MV 2024 > <input id="opt_mv2024" type="number" step="0.01" min="0" max="10" value="6.1"></label>
+                  <label>FM 2024 > <input id="opt_fm2024" type="number" step="0.01" min="0" max="10" value="6.6"></label>
+                  <label>MV medio > <input id="opt_mvMed"  type="number" step="0.01" min="0" max="10" value="6.1"></label>
+                  <label>FM media > <input id="opt_fmMed"  type="number" step="0.01" min="0" max="10" value="6.6"></label>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend>Campi Storico</legend>
+                <div class="opts-actions">
+                  <button id="btnAll" type="button" class="btn sm">Tutti</button>
+                  <button id="btnNone" type="button" class="btn sm">Nessuno</button>
+                </div>
+                <div id="storicoFieldsList" class="opts-list"></div>
+              </fieldset>
+            </div>
+          </details>
           <button id="themeToggle" class="badge" type="button" aria-pressed="false" title="Cambia tema">Tema</button>
         </div>
       </div>
@@ -60,11 +79,6 @@
             </h3>
             <div id="cardStorico" class="card-body"></div>
           </div>
-        </div>
-
-        <div class="card expandable collapsed">
-          <h3>Altre statistiche (tutte le colonne)</h3>
-          <div id="extraFields" class="card-body monospace"></div>
         </div>
       </section>
     </div>
