@@ -4,23 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <title>Serie A 2025–2026 • Webapp</title>
+  <title>Serie A 2025–2026 • Ricerca Giocatore</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <h1 style="display:flex; align-items:center; gap:.6rem; margin:.2rem 0 0 0">
-        <span style="width:28px;height:28px;border-radius:8px;background: radial-gradient(100% 100% at 20% 10%, #8bdcff, #3aa0ff); display:inline-block"></span>
+      <h1 class="brandline">
+        <span class="logo-dot"></span>
         AstaMaster
       </h1>
-      <p class="subtitle">Ricerca giocatore e statistiche (2021–2025)</p>
-      <div style="display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-top:.8rem">
-        <div class="search-box" style="flex:1; display:flex; align-items:center; gap:.5rem">
+      <p class="subtitle">Webapp e statistiche (2021–2025)</p>
+      <div class="toprow">
+        <div class="search-box">
           <input id="searchInput" type="search" placeholder="Cerca un giocatore" autocomplete="off" inputmode="search" aria-label="Cerca un giocatore" />
           <span class="kbd" title="Scorciatoia">Ctrl/⌘ K</span>
         </div>
-        <button id="themeToggle" class="badge" type="button" aria-pressed="false" title="Cambia tema">Tema</button>
+        <div class="view-toggles">
+          <label><input type="checkbox" id="toggle2025" checked> 2025</label>
+          <label><input type="checkbox" id="toggleStorico" checked> Storico</label>
+          <button id="themeToggle" class="badge" type="button" aria-pressed="false" title="Cambia tema">Tema</button>
+        </div>
       </div>
     </div>
   </header>
@@ -32,13 +36,17 @@
       </section>
 
       <section id="playerSection" class="player-section hidden" aria-label="Dettaglio giocatore">
-        <div class="player-header">
-          <h2 id="playerName" style="margin:0">Giocatore</h2>
-          <div id="playerMeta" class="player-meta"></div>
+        <div class="player-hero">
+          <img id="playerPhoto" class="player-photo" alt="Foto giocatore" src="img/placeholder.svg" />
+          <div class="player-id">
+            <h2 id="playerName" class="player-name">Giocatore</h2>
+            <div id="playerMeta" class="player-meta"></div>
+            <div id="playerBadges" class="player-badges"></div>
+          </div>
         </div>
 
         <div class="cards">
-          <div class="card">
+          <div id="wrap2025" class="card">
             <h3>Stagione 2025</h3>
             <div id="card2025" class="card-body"></div>
           </div>
@@ -46,7 +54,7 @@
             <h3>Stagione 2024</h3>
             <div id="card2024" class="card-body"></div>
           </div>
-          <div class="card">
+          <div id="wrapStorico" class="card">
             <h3>Storico (ultime 4)
               <span class="tip" title="Medie e indicatori calcolati sulle ultime 4 stagioni; alcuni valori sono normalizzati (attesi)">i</span>
             </h3>
