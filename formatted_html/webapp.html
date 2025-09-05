@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Serie A 2025-2026 • Webapp
+  </title>
+  <link href="styles.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <header class="site-header">
+   <div class="container">
+    <h1>
+     Serie A 2025-2026
+    </h1>
+    <p class="subtitle">
+     Ricerca giocatore e statistiche (2021–2025)
+    </p>
+   </div>
+  </header>
+  <main class="container">
+   <section class="search-panel">
+    <h2 id="search-title">
+     Cerca un giocatore
+    </h2>
+    <div class="search-box">
+     <input aria-label="Cerca giocatore" autocomplete="off" id="searchInput" placeholder="Digita nome giocatore…" type="search"/>
+    </div>
+    <ul aria-label="Risultati" class="results" id="results" role="listbox">
+    </ul>
+   </section>
+   <section aria-live="polite" class="player-section hidden" id="playerSection">
+    <div class="player-header">
+     <h2 id="playerName">
+      —
+     </h2>
+     <div class="player-meta" id="playerMeta">
+     </div>
+    </div>
+    <div class="cards">
+     <article class="card">
+      <h3>
+       Stagione 2025
+      </h3>
+      <div class="card-body" id="card2025">
+       —
+      </div>
+     </article>
+     <article class="card">
+      <h3>
+       Stagione 2024
+      </h3>
+      <div class="card-body" id="card2024">
+       —
+      </div>
+     </article>
+     <article class="card">
+      <h3>
+       Storico (ultime 4)
+      </h3>
+      <div class="card-body" id="cardStorico">
+       —
+      </div>
+     </article>
+    </div>
+    <details class="card expandable">
+     <summary>
+      Altre statistiche (tutte le colonne)
+     </summary>
+     <div class="card-body monospace" id="extraFields">
+     </div>
+    </details>
+   </section>
+  </main>
+  <footer class="site-footer">
+   <div class="container small">
+    <p>
+     Static web app · GitHub Pages ready
+    </p>
+   </div>
+  </footer>
+  <script defer="" src="app.js">
+  </script>
+ </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "cod": [
+    "COD",
+    "Cod",
+    "Id",
+    "ID"
+  ],
+  "nome": [
+    "Nome",
+    "Giocatore"
+  ],
+  "ruolo": [
+    "R",
+    "Ruolo"
+  ],
+  "squadra": [
+    "Sq",
+    "Squadra",
+    "Team",
+    "Club"
+  ]
+}

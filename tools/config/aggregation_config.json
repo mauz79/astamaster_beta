@@ -1,0 +1,40 @@
+{
+  "seasons_for_history": [
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "sum_fields": [
+    "gf",
+    "gfr",
+    "as",
+    "a",
+    "e",
+    "ag",
+    "gs",
+    "gsr",
+    "rp",
+    "rs"
+  ],
+  "mean_fields": [
+    "p",
+    "mvt",
+    "mvc",
+    "mvf",
+    "mvdst",
+    "mvdlt",
+    "mvand",
+    "mvrnd",
+    "fmt",
+    "fmc",
+    "fmf",
+    "fmdst",
+    "fmdlt",
+    "fmand",
+    "fmrnd",
+    "fmld",
+    "aff"
+  ],
+  "include_raw_per_season": false
+}
