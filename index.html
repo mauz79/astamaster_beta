@@ -15,12 +15,18 @@
       <div class="toprow">
         <div class="search-box">
           <input id="searchInput" type="search" placeholder="Cerca un giocatore" autocomplete="off" inputmode="search" aria-label="Cerca un giocatore" />
-          <span class="kbd" title="Scorciatoia">Ctrl/⌘ K</span>
+          <span class="kbd" title="Scorciatoia">Ctrl F5 / ⌘ K</span>
         </div>
         <div class="view-toggles">
-          <label class="switch"><input type="checkbox" id="switch2025" checked><span class="slider"></span><span class="switch-text">2025</span></label>
-          <label class="switch"><input type="checkbox" id="switchStorico" checked><span class="slider"></span><span class="switch-text">Storico</span></label>
-          <label class="switch"><input type="checkbox" id="switchTheme" checked><span class="slider"></span><span class="switch-text">Tema scuro</span></label>
+          <span class="switch-text">2025</span>
+          <label class="switch"><input type="checkbox" id="switch2025" checked><span class="slider"></span></label>
+
+          <span class="switch-text">Storico</span>
+          <label class="switch"><input type="checkbox" id="switchStorico" checked><span class="slider"></span></label>
+
+          <span class="switch-text">Tema scuro</span>
+          <label class="switch"><input type="checkbox" id="switchTheme" checked><span class="slider"></span></label>
+
           <details class="options">
             <summary>Opzioni</summary>
             <div class="options__body">
@@ -34,13 +40,21 @@
                 </div>
               </fieldset>
               <fieldset>
-                <legend>Campi Storico</legend>
-                <div class="opts-actions">
-                  <button id="btnAll" type="button" class="btn sm">Tutti</button>
-                  <button id="btnNone" type="button" class="btn sm">Nessuno</button>
+                <legend>Storico – gruppi</legend>
+                <div class="opts-groups">
+                  <div class="group-row">
+                    <div class="gname">Statistiche per presenza</div>
+                    <label class="switch"><input type="checkbox" id="switchPerPres" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="group-row">
+                    <div class="gname">Futures</div>
+                    <label class="switch"><input type="checkbox" id="switchFutures" checked><span class="slider"></span></label>
+                  </div>
                 </div>
-                <div id="storicoFieldsList" class="opts-list"></div>
               </fieldset>
+              <div class="opts-actions end">
+                <button id="btnCloseOptions" type="button" class="btn">OK</button>
+              </div>
             </div>
           </details>
         </div>
