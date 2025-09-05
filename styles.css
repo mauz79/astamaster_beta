@@ -13,7 +13,6 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantare
 .search-panel{padding:1.2rem 0}
 .search-box{flex:1;display:flex;align-items:center;gap:.5rem;min-width:260px}
 .search-box input{width:100%;padding:.9rem 1.1rem;border-radius:.7rem;border:1px solid var(--border);background:#0a0f1a;color:var(--text);font-size:1rem}
-.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);background:var(--chip);border-radius:.4rem;padding:.05rem .35rem;font-size:.78rem;color:var(--muted)}
 
 .view-toggles{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap}
 .switch{position:relative;display:inline-flex;align-items:center;gap:.5rem;cursor:pointer}

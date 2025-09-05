@@ -12,9 +12,8 @@ Questo documento guida un **tester umano** a verificare che AstaMaster funzioni 
 ## 2. Casi d’uso principali
 
 ### 2.1 Ricerca & Selezione
-1. Premi **/** per focalizzare la ricerca (il cursore deve finire nell’input).
-2. Digita almeno 3 lettere di un cognome: compaiono i suggerimenti.
-3. Clicca un risultato: la lista scompare e si apre il **Dettaglio giocatore**.
+1. Clicca nel campo di **ricerca** e digita almeno 3 lettere di un cognome: compaiono i **suggerimenti**.
+2. Clicca un risultato: la lista scompare e si apre il **Dettaglio giocatore**.
 **Atteso**: foto (o placeholder), nome, chip ruolo, badge squadra, badge qualità.
 
 ### 2.2 Card 2024 (rigori) & 2025
@@ -55,8 +54,8 @@ Questo documento guida un **tester umano** a verificare che AstaMaster funzioni 
 ## 3. Edge cases
 - **COD non presente** in `2025.json`: la card 2025 segnala “Giocatore non trovato…”.
 - **Valori assenti**: al posto dei numeri appare `—`.
-- **Affidabilità**: se 2024 `aff` è 0–100, la UI la normalizza correttamente.
-- **Input focus**: digitando **/** dentro un input/textarea **non** deve muovere il focus (nessun jump).
+- **Affidabilità**: se 2024 `aff` è 0–100, la UI la normalizza correttamente; in alto vedi **Aff 2024 > 66%**.
+- **Aff. media/stagione**: badge **Aff media > 66%** quando la media storica supera 0.66.
 
 ## 4. Performance & UX
 - Ricerca: per una query di 3–4 lettere, i suggerimenti devono comparire entro ~100–200 ms su desktop.
