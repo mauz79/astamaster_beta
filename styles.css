@@ -23,7 +23,7 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantare
 .options{position:relative}
 .options summary{cursor:pointer;list-style:none;border:1px solid var(--border);border-radius:.5rem;padding:.4rem .6rem;background:var(--panel);color:var(--muted)}
 .options[open] summary{color:var(--text)}
-.options__body{position:absolute;z-index:30;right:0;top:calc(100% + 6px);width:min(920px,92vw);max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:.8rem;padding:1rem;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.options__body{position:absolute;z-index:30;right:0;top:calc(100% + 6px);width:min(720px,92vw);max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:.8rem;padding:1rem;box-shadow:0 10px 40px rgba(0,0,0,.35)}
 .options fieldset{border:1px solid var(--border);border-radius:.6rem;padding:.8rem;margin:0 0 .8rem 0}
 .options legend{padding:0 .3rem;color:var(--muted)}
 .options .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
@@ -31,8 +31,6 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantare
 .opt-check{display:flex;gap:.5rem;align-items:center;margin:.2rem 0}
 .opts-actions{display:flex;gap:.4rem;margin:.2rem 0 .6rem}
 .opts-list{columns:2}
-.profiles{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
-.profiles select{min-width:180px}
 @media(max-width:700px){.options__body{left:0;right:auto;width:92vw}.opts-list{columns:1}.options .grid-2{grid-template-columns:1fr}}
 
 .results{list-style:none;margin:.8rem 0 0;padding:0;display:grid;gap:.4rem}
@@ -58,8 +56,6 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantare
 .card--attention{border-color:#f59e0b; box-shadow:0 0 0 2px rgba(245,158,11,.25) inset}
 .card h3{margin:0;padding:.8rem 1rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
 .card-body{padding:1rem;display:grid;gap:.4rem}
-.expandable h3{cursor:pointer}
-.expandable.collapsed .card-body{display:none}
 .small{font-size:.9rem;color:var(--muted)}
 .row{display:flex;justify-content:space-between;gap:1rem}
 .key{color:var(--muted)}
@@ -78,9 +74,7 @@ mark{background:#ff0;color:#000;padding:0 .15rem;border-radius:.2rem}
 .tip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--border);color:var(--muted);cursor:help}
 [title]{border-bottom:1px dotted var(--border)}
 [title]:hover{border-bottom-color:transparent}
-.ico{opacity:.85;margin-right:.35rem}
 
-/* CHIPS ruolo (P/D/C/A) */
 .chip{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .6rem;border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:.2px;color:#fff}
 .chip--role{border:0}
 .role--P{background:#7b61ff}
