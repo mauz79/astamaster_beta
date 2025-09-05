@@ -1,1 +1,80 @@
-<!DOCTYPE html><html lang='it'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1'/><title>Serie A 2025-2026 • Webapp</title><link rel='stylesheet' href='styles.css'/></head><body><header class='site-header'><div class='container'><h1>Serie A 2025-2026</h1><p class='subtitle'>Ricerca giocatore e statistiche (2021–2025)</p></div></header><main class='container'><section class='search-panel'><h2 id='search-title'>Cerca un giocatore</h2><div class='search-box'><input id='searchInput' type='search' placeholder='Digita nome giocatore…' autocomplete='off' aria-label='Cerca giocatore'/></div><ul id='results' class='results' role='listbox' aria-label='Risultati'></ul></section><section id='playerSection' class='player-section hidden' aria-live='polite'><div class='player-header'><h2 id='playerName'>—</h2><div id='playerMeta' class='player-meta'></div></div><div class='cards'><article class='card'><h3>Stagione 2025</h3><div id='card2025' class='card-body'>—</div></article><article class='card'><h3>Stagione 2024</h3><div id='card2024' class='card-body'>—</div></article><article class='card'><h3>Storico (ultime 4)</h3><div id='cardStorico' class='card-body'>—</div></article></div><details class='card expandable'><summary>Altre statistiche (tutte le colonne)</summary><div id='extraFields' class='card-body monospace'></div></details></section></main><footer class='site-footer'><div class='container small'><p>Static web app · GitHub Pages ready</p></div></footer><script defer src='app.js'></script></body></html>
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 style="display:flex; align-items:center; gap:.6rem; margin:.2rem 0 0 0">
+        <span style="width:28px;height:28px;border-radius:8px;background: radial-gradient(100% 100% at 20% 10%, #8bdcff, #3aa0ff); display:inline-block"></span>
+        AstaMaster
+      </h1>
+      <p class="subtitle">Ricerca giocatore e statistiche (2021–2025)</p>
+      <div style="display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-top:.8rem">
+        <div class="search-box" style="flex:1">
+          <input id="searchInput" type="search" placeholder="Cerca un giocatore" autocomplete="off" inputmode="search" aria-label="Cerca un giocatore" />
+        </div>
+        <button id="themeToggle" class="badge" type="button" aria-pressed="false" title="Cambia tema">Tema</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="search-panel" aria-label="Risultati ricerca">
+        <ul id="results" class="results" role="listbox"></ul>
+      </section>
+
+      <section id="playerSection" class="player-section hidden" aria-label="Dettaglio giocatore">
+        <div class="player-header">
+          <h2 id="playerName" style="margin:0">Giocatore</h2>
+          <div id="playerMeta" class="player-meta"></div>
+        </div>
+
+        <div class="cards">
+          <div class="card">
+            <h3>Stagione 2025</h3>
+            <div id="card2025" class="card-body"></div>
+          </div>
+          <div class="card">
+            <h3>Stagione 2024</h3>
+            <div id="card2024" class="card-body"></div>
+          </div>
+          <div class="card">
+            <h3>Storico (ultime 4)
+              <span class="tip" title="Medie e indicatori calcolati sulle ultime 4 stagioni; alcuni valori sono normalizzati (attesi)">i</span>
+            </h3>
+            <div id="cardStorico" class="card-body"></div>
+          </div>
+        </div>
+
+        <div class="card expandable">
+          <h3>Altre statistiche (tutte le colonne)</h3>
+          <div id="extraFields" class="card-body monospace"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container small">Static web app · GitHub Pages ready</div>
+  </footer>
+
+  <noscript>Per usare questa web app attiva JavaScript nel browser.</noscript>
+  <script src="app.js" defer></script>
+  <script>
+    (function(){{
+      const root = document.documentElement; const key = 'astamaster-theme'; const btn = document.getElementById('themeToggle');
+      const apply = (mode)=>{{ root.setAttribute('data-theme', mode); if(btn) btn.setAttribute('aria-pressed', String(mode==='dark')); }};
+      const saved = localStorage.getItem(key);
+      if(saved==='light'||saved==='dark'){{ apply(saved); }} else {{ apply('dark'); }}
+      btn && btn.addEventListener('click',()=>{{ const next = (root.getAttribute('data-theme')==='dark') ? 'light' : 'dark'; apply(next); localStorage.setItem(key,next); }});
+    }})();
+  </script>
+</body>
+</html>
