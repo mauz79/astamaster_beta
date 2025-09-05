@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <title>{{title}}</title>
+  <title>Serie A 2025–2026 • Webapp</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -16,8 +16,9 @@
       </h1>
       <p class="subtitle">Ricerca giocatore e statistiche (2021–2025)</p>
       <div style="display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-top:.8rem">
-        <div class="search-box" style="flex:1">
+        <div class="search-box" style="flex:1; display:flex; align-items:center; gap:.5rem">
           <input id="searchInput" type="search" placeholder="Cerca un giocatore" autocomplete="off" inputmode="search" aria-label="Cerca un giocatore" />
+          <span class="kbd" title="Scorciatoia">Ctrl/⌘ K</span>
         </div>
         <button id="themeToggle" class="badge" type="button" aria-pressed="false" title="Cambia tema">Tema</button>
       </div>
@@ -26,7 +27,7 @@
 
   <main>
     <div class="container">
-      <section class="search-panel" aria-label="Risultati ricerca">
+      <section id="panelResults" class="search-panel" aria-label="Risultati ricerca">
         <ul id="results" class="results" role="listbox"></ul>
       </section>
 
@@ -53,7 +54,7 @@
           </div>
         </div>
 
-        <div class="card expandable">
+        <div class="card expandable collapsed">
           <h3>Altre statistiche (tutte le colonne)</h3>
           <div id="extraFields" class="card-body monospace"></div>
         </div>
@@ -68,13 +69,13 @@
   <noscript>Per usare questa web app attiva JavaScript nel browser.</noscript>
   <script src="app.js" defer></script>
   <script>
-    (function(){{
+    (function(){
       const root = document.documentElement; const key = 'astamaster-theme'; const btn = document.getElementById('themeToggle');
-      const apply = (mode)=>{{ root.setAttribute('data-theme', mode); if(btn) btn.setAttribute('aria-pressed', String(mode==='dark')); }};
+      const apply = (mode)=>{ root.setAttribute('data-theme', mode); if(btn) btn.setAttribute('aria-pressed', String(mode==='dark')); };
       const saved = localStorage.getItem(key);
-      if(saved==='light'||saved==='dark'){{ apply(saved); }} else {{ apply('dark'); }}
-      btn && btn.addEventListener('click',()=>{{ const next = (root.getAttribute('data-theme')==='dark') ? 'light' : 'dark'; apply(next); localStorage.setItem(key,next); }});
-    }})();
+      if(saved==='light'||saved==='dark'){ apply(saved); } else { apply('dark'); }
+      btn && btn.addEventListener('click',()=>{ const next = (root.getAttribute('data-theme')==='dark') ? 'light' : 'dark'; apply(next); localStorage.setItem(key,next); });
+    })();
   </script>
 </body>
 </html>

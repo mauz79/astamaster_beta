@@ -47,11 +47,20 @@ const TOOLTIP_STORICO = {
   rp_media_stagione_norm: "Rigori parati attesi medi"
 };
 const $ = sel => document.querySelector(sel);
+
+function fmtValue(v){
+  if(v===null || v===undefined) return '—';
+  const num = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v.toString().replace(',', '.')) : NaN);
+  if(!Number.isFinite(num)) return String(v);
+  return Number(num.toFixed(3)).toString();
+}
+
 function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&','<':'<','>':'>','"':'"','\'':'&#39;'}[s])); }
 function rowKV(label, value, key){
   const tipText = TOOLTIP[key] || TOOLTIP_STORICO[key];
   const tip = tipText ? ` title="${escapeHtml(tipText)}"` : '';
-  return `<div class="row"><span class="key"${tip}>${label}</span><span class="val">${value ?? '—'}</span></div>`;
+  const display = fmtValue(value);
+  return `<div class="row"><span class="key"${tip}>${label}</span><span class="val">${display}</span></div>`;
 }
 function listKV(obj, keys){ return keys.filter(k => k in obj).map(k => rowKV(LABELS[k] || k, obj[k], k)).join(''); }
 function renderExtra(obj){
@@ -74,10 +83,13 @@ function highlightMatch(text, query){
   if(i<0) return escapeHtml(lt); const end = i+q.length;
   return escapeHtml(lt.slice(0,i))+'<mark>'+escapeHtml(lt.slice(i,end))+'</mark>'+escapeHtml(lt.slice(end));
 }
-// Normalizza eventuali cod tipo "101507.0" -> "101507"
 function normCod(x){ const s = String(x ?? '').trim(); if(/^\d+\.0$/.test(s)) return s.slice(0,-2); return s; }
 let INDEX=[]; let data2025=null, data2024=null, storico=null; let map2025=null;
 async function loadIndex(){ try{ INDEX = await fetchJSON('index.json') }catch(e){ console.warn('index.json non trovato', e) } }
+
+function hideResults(){ const p = document.getElementById('panelResults'); if(p) p.classList.add('hidden'); }
+function showResults(){ const p = document.getElementById('panelResults'); if(p) p.classList.remove('hidden'); }
+
 function renderResults(items, query){
   const ul = document.getElementById('results'); ul.innerHTML='';
   items.slice(0,50).forEach(item=>{
@@ -91,7 +103,8 @@ function renderResults(items, query){
   });
 }
 function search(q){ const nq = norm(q.trim()); if(!nq){$('#results').innerHTML='';return} const res = INDEX.filter(x=>norm(x.nome).includes(nq)); renderResults(res,q) }
-let debounceTimer; document.getElementById('searchInput').addEventListener('input', (e)=>{ clearTimeout(debounceTimer); const v=e.target.value; debounceTimer=setTimeout(()=>search(v),140) })
+let debounceTimer; const inputEl = document.getElementById('searchInput');
+inputEl.addEventListener('input', (e)=>{ showResults(); clearTimeout(debounceTimer); const v=e.target.value; debounceTimer=setTimeout(()=>search(v),140) })
 async function ensureYear(year){
   if(year===2025 && !data2025){ data2025 = await fetchJSON('2025.json'); map2025 = new Map(data2025.filter(r=>r.cod!=null||r.COD!=null).map(r=>[normCod(r.cod??r.COD), r])) }
   if(year===2024 && !data2024){ data2024 = await fetchJSON('2024.json') }
@@ -105,21 +118,30 @@ async function selectPlayer(cod, idx){
   document.getElementById('playerMeta').innerHTML = `
     <span class="${roleKnown?`chip chip--role role--${role}`:'badge'}">${escapeHtml(role || '—')}</span>
     <span class="badge">${escapeHtml(idx?.squadra_2025||'—')}</span>`;
+
+  $('#results').innerHTML=''; hideResults();
+
   document.getElementById('card2025').innerHTML='<span class=spinner aria-label=caricamento></span>';
   document.getElementById('card2024').innerHTML='<span class=spinner aria-label=caricamento></span>';
   document.getElementById('cardStorico').innerHTML='<span class=spinner aria-label=caricamento></span>';
   document.getElementById('extraFields').innerHTML='';
+
   await ensureYear(2025); await ensureYear(2024);
   const codN = normCod(cod);
   const rec25 = map2025? map2025.get(codN) : null;
+  const card25El = document.getElementById('card2025');
+  const card25Wrap = card25El.closest('.card');
+  if(card25Wrap) card25Wrap.classList.remove('card--attention');
+
   if(rec25){
     const main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'];
     const parts=[]; parts.push(listKV(rec25, main25));
-    const badges=[]; if(rec25.cambio_squadra===true) badges.push('<span class=\"badge alert\">Cambio Squadra</span>'); if(rec25.cambio_ruolo===true) badges.push('<span class=\"badge warn\">Cambio Ruolo</span>'); if(badges.length) parts.unshift(`<div class=\"badges\">${badges.join(' ')}</div>`);
-    document.getElementById('card2025').innerHTML = parts.join('');
+    const badges=[]; if(rec25.cambio_squadra===true) badges.push('<span class=\"badge alert\">Cambio Squadra</span>'); if(rec25.cambio_ruolo===true) badges.push('<span class=\"badge warn\">Cambio Ruolo</span>');
+    if(badges.length){ parts.unshift(`<div class=\"badges\">${badges.join(' ')}</div>`); if(card25Wrap) card25Wrap.classList.add('card--attention'); }
+    card25El.innerHTML = parts.join('');
     document.getElementById('extraFields').innerHTML = renderExtra(rec25)
   } else {
-    document.getElementById('card2025').innerHTML = '<div class=small>Giocatore non trovato nel 2025.json</div>';
+    card25El.innerHTML = '<div class=small>Giocatore non trovato nel 2025.json</div>';
   }
   // 2024
   let p24=null; if(data2024){ const map24=indexByCOD(data2024); p24 = map24.get(codN) }
@@ -143,11 +165,16 @@ async function selectPlayer(cod, idx){
     console.warn('Errore caricamento storico.json', e);
   }
 }
-// Shortcut Ctrl/⌘+K per focalizzare la ricerca
+
+document.addEventListener('click', (e)=>{
+  const h3 = e.target.closest('.expandable h3');
+  if(h3){ const card = h3.closest('.expandable'); card?.classList.toggle('collapsed'); }
+});
+
 document.addEventListener('keydown', (e)=>{
   if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
     const el = document.getElementById('searchInput');
-    if(el){ e.preventDefault(); el.focus(); el.select?.(); }
+    if(el){ e.preventDefault(); el.focus(); el.select?.(); showResults(); }
   }
 });
 
