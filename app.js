@@ -46,8 +46,12 @@ const TOOLTIP_STORICO = {
   gs_media_stagione_norm: "Gol subiti attesi medi",
   rp_media_stagione_norm: "Rigori parati attesi medi"
 };
+const HIDE_STORICO = new Set([
+  'aff_2024','fmand_2024','fmt_2024','mvand_2024','mvt_2024','p_2024','ruolo_2024','oldsq'
+]);
 const $ = sel => document.querySelector(sel);
 
+// === Formatting max 3 decimals ===
 function fmtValue(v){
   if(v===null || v===undefined) return '—';
   const num = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v.toString().replace(',', '.')) : NaN);
@@ -134,7 +138,15 @@ async function selectPlayer(cod, idx){
   if(card25Wrap) card25Wrap.classList.remove('card--attention');
 
   if(rec25){
-    const main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'];
+    const roleFields = (rec25?.r || role || '').toString().toUpperCase().trim();
+    let main25;
+    if(roleFields === 'P'){
+      // Portiere: mostra GS e GSR, non GF/GFR
+      main25 = ['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gs','gsr','as','a','e'];
+    } else {
+      // Altri ruoli: mostra GF (non GS)
+      main25 = ['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'];
+    }
     const parts=[]; parts.push(listKV(rec25, main25));
     const badges=[]; if(rec25.cambio_squadra===true) badges.push('<span class=\"badge alert\">Cambio Squadra</span>'); if(rec25.cambio_ruolo===true) badges.push('<span class=\"badge warn\">Cambio Ruolo</span>');
     if(badges.length){ parts.unshift(`<div class=\"badges\">${badges.join(' ')}</div>`); if(card25Wrap) card25Wrap.classList.add('card--attention'); }
@@ -143,17 +155,28 @@ async function selectPlayer(cod, idx){
   } else {
     card25El.innerHTML = '<div class=small>Giocatore non trovato nel 2025.json</div>';
   }
-  // 2024
+  // 2024 (stessa logica portiere vs altri)
   let p24=null; if(data2024){ const map24=indexByCOD(data2024); p24 = map24.get(codN) }
-  if(p24){ const main24=['r','sq','aff','p','mvt','fmt','gf','as','a','e']; document.getElementById('card2024').innerHTML = listKV(p24, main24) }
+  if(p24){
+    const role24 = (p24?.r || role || '').toString().toUpperCase().trim();
+    let main24;
+    if(role24 === 'P'){
+      main24 = ['r','sq','aff','p','mvt','fmt','gs','gsr','as','a','e'];
+    } else {
+      main24 = ['r','sq','aff','p','mvt','fmt','gf','as','a','e'];
+    }
+    document.getElementById('card2024').innerHTML = listKV(p24, main24)
+  }
   else { document.getElementById('card2024').innerHTML='<div class=small>Dati 2024 non disponibili.</div>' }
-  // Storico
+  // Storico (filtra chiavi non richieste)
   try{
     if(!storico){ storico = await fetchJSON('storico.json') }
     const total = Array.isArray(storico)? storico.length : 0;
     const srec = (storico||[]).find(x => normCod(x.cod) === codN);
     if(srec){
-      const fields = Object.keys(srec).filter(k => k !== 'cod' && k !== 'stagioni_considerate').sort();
+      const fields = Object.keys(srec)
+        .filter(k => k !== 'cod' && k !== 'stagioni_considerate' && !HIDE_STORICO.has(k))
+        .sort();
       const rows = fields.map(k => rowKV(LABELS_STORICO[k] || LABELS[k] || k, srec[k], k)).join('');
       const header = Array.isArray(srec.stagioni_considerate)? `<div class=\"small\">Stagioni: ${srec.stagioni_considerate.join(', ')}</div>`:'';
       document.getElementById('cardStorico').innerHTML = header + rows;
