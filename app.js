@@ -389,19 +389,38 @@ function getRoleDist2024(role, metric){
 }
 function computeRoleStats2024(metric, value, role){
   try{
-    const v=Number(value);
-    const distr = getRoleDist2024(role, metric);
-    if(!distr||!Number.isFinite(v)) return null;
-    const {vals,N,mean,std} = distr;
+    const v = Number(value);
+    const distr = getRoleDist2024(role, metric); // usa la cache esistente
+    if(!distr || !Number.isFinite(v)) return null;
+    const { vals, N, mean, std } = distr;
     if(!N) return null;
-    const eps=1e-9; let less=0, equal=0;
-    for(const x of vals){ if(x < v - eps) less++; else if(Math.abs(x-v)<=eps) equal++; }
-    const pct=(less + 0.5*equal)/N;      // 0..1 (midrank)
-    const z= std>0 ? (v-mean)/std : 0;   // z-score
-    const rankMid = Math.max(1, Math.round( less + (equal ? (equal+1)/2 : 1 ) )); // posizione k
-    return {pct, z, N, mean, std, rank: rankMid};
-  }catch{ return null; }
+
+    // Conta quanti valori sono < v e quanti == v
+    const eps = 1e-9;
+    let less = 0, equal = 0;
+    for (const x of vals) {
+      if (x < v - eps) less++;
+      else if (Math.abs(x - v) <= eps) equal++;
+    }
+
+    // Percentile (0..1), coerente con il midrank (più è alto → meglio è)
+    const mid = less + 0.5 * equal;
+    const pct = mid / N;
+
+    // Z-score rispetto a media e dev. standard del ruolo
+    const z = std > 0 ? (v - mean) / std : 0;
+
+    // === RANK MINIMO in ordine DECRESCENTE (1 = migliore) ===
+    // #strettamente_maggiori = N - (less + equal)
+    // rank_min_desc = (N - (less + equal)) + 1
+    const rank = Math.max(1, N - (less + equal) + 1);
+
+    return { pct, z, N, mean, std, rank };
+  } catch {
+    return null;
+  }
 }
+
 function rowSimple(label, value){
   const display = (typeof value === 'number') ? fmtValue(value) : String(value);
   return `<div class="row"><span class="key">${escapeHtml(label)}</span><span class="val">${display}</span></div>`;
