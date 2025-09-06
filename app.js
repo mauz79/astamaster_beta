@@ -51,9 +51,20 @@ const HIDE_STORICO = new Set([
 ]);
 
 // Iconcine SOLO per 2024 e Storico
+
 const ICONS = {
-  gf: '⚽', gfr: '⚪⚽', gs: '\uD83E\uDDE4', gsr: '⚪\uD83E\uDDE4', as: '\uD83C\uDFAF', a: '\uD83D\uDFE8', e: '\uD83D\uDFE5', rp: '\uD83E\uDDF1'
+  gf: '⚽',
+  gfr: '🅁⚽',        // gol su rigore
+  ag: '🔴⚽',        // autogol
+  rs: '🅁🔴⚽',      // rigore sbagliato
+  gs: '🔴🧤',        // gol subiti
+  gsr: '🅁🔴🧤',    // gol subiti su rigore
+  rp: '🅁🟢🧤',    // rigori parati
+  as: '🎯',
+  a:  '🟨',
+  e:  '🟥'
 };
+
 
 // Tooltips per le sezioni Storico
 const SECT_TIPS = {
