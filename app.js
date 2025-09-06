@@ -1,6 +1,5 @@
 const DATA_BASE = 'data/';
 const IMG_BASE = 'img/';
-
 // ===== Labels =====
 const LABELS = {
   cod: "COD", nome: "Nome", r: "Ruolo", sq: "Squadra",
@@ -12,7 +11,6 @@ const LABELS = {
   aff: "Affidabilità %",
   cambio_squadra: "Cambio Squadra", cambio_ruolo: "Cambio Ruolo"
 };
-
 // Storico: etichette normalizzate
 const LABELS_STORICO = {
   p_tot_4stag: "Presenze tot",
@@ -43,13 +41,11 @@ const LABELS_STORICO = {
   gs_media_stagione_norm: "GS medi (attesi)",
   rp_media_stagione_norm: "RP medi (attesi)"
 };
-
 // Campi da non mostrare MAI
 const HIDE_STORICO = new Set([
   'aff_2024','fmand_2024','fmt_2024','mvand_2024','mvt_2024','p_2024','ruolo_2024','oldsq',
   'a_per_presenza','as_per_presenza','e_per_presenza','gf_per_presenza','nome','oldr','sq','squadra_2024_status'
 ]);
-
 // Iconcine SOLO per 2024 e Storico
 const ICONS = {
   gf: '⚽',
@@ -63,14 +59,12 @@ const ICONS = {
   a: '🟨',
   e: '🟥'
 };
-
 // Tooltips per le sezioni Storico
 const SECT_TIPS = {
   dati: 'Medie e conteggi consolidati sulle ultime stagioni',
   perPres: 'Indicatori normalizzati rispetto alle presenze',
   futures: 'Valori attesi (normalizzati) stimati su base storica'
 };
-
 // ===== Helpers =====
 const $ = sel => document.querySelector(sel);
 function fmtValue(v){ if(v===null||v===undefined) return '—'; const n = typeof v==='number'? v : Number(String(v).replace(',','.')); if(!Number.isFinite(n)) return String(v); return Number(n.toFixed(3)).toString(); }
@@ -82,10 +76,8 @@ async function fetchJSON(f){ const r=await fetch(DATA_BASE+f,{cache:'no-store'})
 function norm(s){return (s||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase()}
 function highlightMatch(t,q){ const lt=t||'',qq=q||''; const i=lt.toLowerCase().indexOf(qq.toLowerCase()); if(i<0) return escapeHtml(lt); const e=i+qq.length; return escapeHtml(lt.slice(0,i))+'<mark>'+escapeHtml(lt.slice(i,e))+'</mark>'+escapeHtml(lt.slice(e)) }
 function normCod(x){ const s=String(x??'').trim(); return /^\d+\.0$/.test(s)? s.slice(0,-2): s }
-
 // ===== State =====
 let INDEX=[], data2025=null, data2024=null, storico=null, map2025=null;
-
 // ===== Suggestions =====
 async function loadIndex(){ try{ INDEX=await fetchJSON('index.json') }catch(e){ console.warn('index.json non trovato',e) } }
 function hideResults(){ $('#panelResults')?.classList.add('hidden') }
@@ -93,33 +85,27 @@ function showResults(){ $('#panelResults')?.classList.remove('hidden') }
 function renderResults(items,q){ const ul=$('#results'); ul.innerHTML=''; items.slice(0,50).forEach(item=>{ const li=document.createElement('li'); li.className='result-item'; li.setAttribute('role','option'); li.tabIndex=0; const title=`<span class="result-title">${highlightMatch(item.nome||'', q)}</span>`; const meta=`<span class="result-meta">${escapeHtml(item.ruolo_2025||'—')} · ${escapeHtml(item.squadra_2025||'—')}</span>`; li.innerHTML=`${title}<span>${meta}</span>`; li.addEventListener('click',()=>selectPlayer(item.cod,item)); li.addEventListener('keypress',(e)=>{if(e.key==='Enter') selectPlayer(item.cod,item)}); ul.appendChild(li) }) }
 function search(q){ const nq=norm(q.trim()); if(!nq){ $('#results').innerHTML=''; return } const res=INDEX.filter(x=>norm(x.nome).includes(nq)); renderResults(res,q) }
 let debounceTimer; document.getElementById('searchInput').addEventListener('input', e=>{ showResults(); clearTimeout(debounceTimer); const v=e.target.value; debounceTimer=setTimeout(()=>search(v),140) })
-
 // ===== Data loading =====
-async function ensureYear(y){ 
-  if(y===2025 && !data2025){ data2025=await fetchJSON('2025.json'); map2025=new Map(data2025.filter(r=>r.cod!=null||r.COD!=null).map(r=>[normCod(r.cod??r.COD), r])) } 
-  if(y===2024 && !data2024){ data2024=await fetchJSON('2024.json') } 
+async function ensureYear(y){
+  if(y===2025 && !data2025){ data2025=await fetchJSON('2025.json'); map2025=new Map(data2025.filter(r=>r.cod!=null||r.COD!=null).map(r=>[normCod(r.cod??r.COD), r])) }
+  if(y===2024 && !data2024){ data2024=await fetchJSON('2024.json') }
 }
 function indexByCOD(recs){ const m=new Map(); for(const r of recs){ const cod=(r.cod??r.COD??r.id??r.Id); if(cod!=null) m.set(normCod(cod),r) } return m }
-
 // ===== Photo =====
 const PHOTO_EXTS=['jpg','png','webp'];
 function setPlayerPhoto(cod){ const img=$('#playerPhoto'); if(!img) return; let i=0; const next=()=>{ if(i>=PHOTO_EXTS.length){ img.src='img/placeholder.svg'; return } img.src=IMG_BASE+cod+'.'+PHOTO_EXTS[i++] }; img.onerror=()=>next(); next() }
-
 // ===== Toggles (card visibility + theme) =====
 const TOGGLE_KEYS={ y2025:'toggle-2025', storico:'toggle-storico' };
 function applyToggles(){ const t25=localStorage.getItem(TOGGLE_KEYS.y2025)!=='off'; const ts=localStorage.getItem(TOGGLE_KEYS.storico)!=='off'; $('#wrap2025')?.classList.toggle('hidden',!t25); $('#wrapStorico')?.classList.toggle('hidden',!ts); const s25=$('#switch2025'); if(s25) s25.checked=(t25); const ss=$('#switchStorico'); if(ss) ss.checked=(ts) }
 function setupToggles(){ $('#switch2025')?.addEventListener('change',e=>{ localStorage.setItem(TOGGLE_KEYS.y2025, e.target.checked?'on':'off'); applyToggles() }); $('#switchStorico')?.addEventListener('change',e=>{ localStorage.setItem(TOGGLE_KEYS.storico, e.target.checked?'on':'off'); applyToggles() }); applyToggles(); }
-
 const THEME_KEY='astamaster-theme';
 function applyTheme(mode){ document.documentElement.setAttribute('data-theme', mode); const sw=$('#switchTheme'); if(sw) sw.checked=(mode==='dark'); }
 function setupTheme(){ const saved=localStorage.getItem(THEME_KEY); if(saved==='light'||saved==='dark'){ applyTheme(saved) } else { applyTheme('dark') } $('#switchTheme')?.addEventListener('change', e=>{ const mode=e.target.checked?'dark':'light'; applyTheme(mode); localStorage.setItem(THEME_KEY, mode); }); }
-
 // ===== Thresholds (parametrizzabili) =====
 const DEFAULT_THRESHOLDS={ mv2024:6.1, fm2024:6.6, mvMed:6.1, fmMed:6.6 };
 const LS_THRESH='astamaster-thresholds';
 function getThresholds(){ try{ const t=JSON.parse(localStorage.getItem(LS_THRESH)||'{}'); return { mv2024: +t.mv2024||DEFAULT_THRESHOLDS.mv2024, fm2024: +t.fm2024||DEFAULT_THRESHOLDS.fm2024, mvMed: +t.mvMed||DEFAULT_THRESHOLDS.mvMed, fmMed: +t.fmMed||DEFAULT_THRESHOLDS.fmMed } }catch{ return {...DEFAULT_THRESHOLDS} } }
 function saveThresholds(t){ localStorage.setItem(LS_THRESH, JSON.stringify(t)) }
-
 // ===== Storico: gruppi (non singole voci) =====
 const LS_STO_GROUPS='astamaster-storico-groups';
 function getGroups(){ try{ const g=JSON.parse(localStorage.getItem(LS_STO_GROUPS)||'{}'); return { perPres: g.perPres!==false, futures: g.futures!==false } }catch{ return { perPres:true, futures:true } } }
@@ -130,12 +116,10 @@ function storicoSectionOrder(){
   const FUTURES = ['gf_media_stagione_norm','as_media_stagione_norm','a_media_stagione_norm','e_media_stagione_norm','gs_media_stagione_norm','rp_media_stagione_norm'];
   return { DATI_STAT, PER_PRES, FUTURES };
 }
-
 // ===== Preferenza utente: metrica per il badge posizione =====
 const LS_BADGE_METRIC='astamaster-badge-metric';
 function getBadgeMetric(){ const v=localStorage.getItem(LS_BADGE_METRIC); return (v==='fm'||v==='mv'||v==='best')? v : 'best'; }
 function saveBadgeMetric(v){ if(v==='fm'||v==='mv'||v==='best') localStorage.setItem(LS_BADGE_METRIC, v); }
-
 // ===== Options UI =====
 function buildOptionsUI(){
   // Soglie
@@ -143,19 +127,16 @@ function buildOptionsUI(){
   if(mv24) mv24.value=t.mv2024; if(fm24) fm24.value=t.fm2024; if(mvm) mvm.value=t.mvMed; if(fmm) fmm.value=t.fmMed;
   const sync=()=>saveThresholds({ mv2024:parseFloat(mv24.value||t.mv2024), fm2024:parseFloat(fm24.value||t.fm2024), mvMed:parseFloat(mvm.value||t.mvMed), fmMed:parseFloat(fmm.value||t.fmMed) });
   [mv24,fm24,mvm,fmm].forEach(i=>i&&i.addEventListener('change',sync));
-
   // Gruppi Storico come switch
   const g=getGroups();
   const sg1=$('#switchPerPres'); const sg2=$('#switchFutures');
   if(sg1) sg1.checked = g.perPres; if(sg2) sg2.checked = g.futures;
   sg1?.addEventListener('change',()=>{ saveGroups({ perPres: sg1.checked, futures: sg2.checked }) });
   sg2?.addEventListener('change',()=>{ saveGroups({ perPres: sg1.checked, futures: sg2.checked }) });
-
   // Pulsante OK per chiudere il pannello Opzioni
   const close = ()=>{ const det=document.querySelector('details.options'); if(det) det.removeAttribute('open'); };
   $('#btnCloseOptions')?.addEventListener('click', close);
   $('#btnCloseOptionsTop')?.addEventListener('click', close);
-
   // Reset impostazioni
   $('#btnResetOptions')?.addEventListener('click', ()=>{
     localStorage.removeItem(LS_THRESH);
@@ -170,7 +151,6 @@ function buildOptionsUI(){
     buildOptionsUI();
     alert('Impostazioni ripristinate.');
   });
-
   // --- Badge posizione: UI dinamica (FM/MV/Migliore) ---
   try{
     const wrapper = document.querySelector('.options__body') || document.querySelector('details.options');
@@ -190,8 +170,8 @@ function buildOptionsUI(){
     const rbFm=document.getElementById('opt_badge_fm');
     const rbMv=document.getElementById('opt_badge_mv');
     if(rbBest) rbBest.checked=(bm==='best');
-    if(rbFm)   rbFm.checked  =(bm==='fm');
-    if(rbMv)   rbMv.checked  =(bm==='mv');
+    if(rbFm)   rbFm.checked =(bm==='fm');
+    if(rbMv)   rbMv.checked =(bm==='mv');
     [rbBest,rbFm,rbMv].forEach(el=>{ el && el.addEventListener('change', ()=>{
       const val = rbBest?.checked ? 'best' : (rbFm?.checked ? 'fm' : (rbMv?.checked ? 'mv' : 'best'));
       saveBadgeMetric(val);
@@ -199,35 +179,28 @@ function buildOptionsUI(){
     });});
   }catch(e){ console.warn('Badge metric options not available', e); }
 }
-
 // ===== Badges header (inclusi Affidabilità) =====
-function addTopBadges(rec25,p24,srec){ 
-  const wrap=$('#playerBadges'); if(!wrap) return; 
+function addTopBadges(rec25,p24,srec){
+  const wrap=$('#playerBadges'); if(!wrap) return;
   const out=[]; const thr=getThresholds();
   if(rec25?.cambio_ruolo===true) out.push('<span class="badge warn">Cambio Ruolo</span>');
   const isCambioSq=rec25?.cambio_squadra===true; const isNew=(srec?.oldsq&&String(srec.oldsq).toLowerCase()==='new');
   if(isNew) out.push('<span class="badge info">Nuovo acquisto</span>');
   else if(isCambioSq) out.push('<span class="badge alert">Cambio Squadra</span>');
-
   const mv2024=+p24?.mvt, fm2024=+p24?.fmt;
   if(Number.isFinite(mv2024)&&mv2024>thr.mv2024) out.push(`<span class="badge good">MV 2024 > ${thr.mv2024}</span>`);
   if(Number.isFinite(fm2024)&&fm2024>thr.fm2024) out.push(`<span class="badge good">FM 2024 > ${thr.fm2024}</span>`);
-
   const mvMed=+srec?.mvt_media_stagione, fmMed=+srec?.fmt_media_stagione;
   if(Number.isFinite(mvMed)&&mvMed>thr.mvMed) out.push(`<span class="badge good">MV medio > ${thr.mvMed}</span>`);
   if(Number.isFinite(fmMed)&&fmMed>thr.fmMed) out.push(`<span class="badge good">FM media > ${thr.fmMed}</span>`);
-
   let aff24 = Number(p24?.aff);
   if(Number.isFinite(aff24)){ if(aff24>1) aff24/=100; if(aff24>0.66) out.push('<span class="badge good">Aff 2024 > 66%</span>'); }
   const affMed = Number(srec?.aff_media_stagione);
   if(Number.isFinite(affMed) && affMed>0.66) out.push('<span class="badge good">Aff media > 66%</span>');
-
   wrap.innerHTML=out.join(' ')
 }
-
 // ===== Expandable (card Nascoste) =====
 document.addEventListener('click', (e)=>{ const h3 = e.target.closest('.expandable h3'); if(h3){ const card=h3.closest('.expandable'); card?.classList.toggle('collapsed'); }});
-
 // ===== Player selection =====
 async function selectPlayer(cod, idx){
   $('#playerSection').classList.remove('hidden');
@@ -239,12 +212,9 @@ async function selectPlayer(cod, idx){
   $('#card2024').innerHTML='<span class=spinner aria-label=caricamento></span>';
   $('#cardStorico').innerHTML='<span class=spinner aria-label=caricamento></span>';
   $('#cardHidden').innerHTML='<span class=spinner aria-label=caricamento></span>';
-
   await ensureYear(2025); await ensureYear(2024);
-
   const codN=normCod(cod); const rec25=map2025? map2025.get(codN) : null;
   const wrap25=$('#wrap2025'); wrap25?.classList.remove('card--attention');
-
   if(rec25){
     const rf=(rec25?.r||role||'').toUpperCase().trim();
     let main25;
@@ -257,11 +227,12 @@ async function selectPlayer(cod, idx){
   } else {
     $('#card2025').innerHTML='<div class=small>Giocatore non trovato nel 2025.json</div>'
   }
-
   let p24=null; if(data2024){ const m24=indexByCOD(data2024); p24=m24.get(codN) }
-
   if (p24) {
     const r24 = (p24?.r || role || '').toUpperCase().trim();
+    // ▼ NUOVO: ruolo di confronto per l’asta 2025 (usa ruolo 2025 se disponibile)
+    const rTarget = (rec25?.r || role || r24 || '').toUpperCase().trim();
+
     let main24;
     if (r24 === 'P') {
       main24 = ['r','sq','aff','p','mvt','fmt','gs','gsr','rp','as','ag','a','e'];
@@ -270,11 +241,9 @@ async function selectPlayer(cod, idx){
     }
     // Render standard 2024
     $('#card2024').innerHTML = listKVctx(p24, main24, '2024');
-
     // === Percentile & z-score nel ruolo (2024) + posizione assoluta + note ===
     const fmStats24 = computeRoleStats2024('fmt', p24?.fmt, r24);
     const mvStats24 = computeRoleStats2024('mvt', p24?.mvt, r24);
-
     // Sezione "Posizione nel ruolo (2024)"
     let rankHTML = '';
     if (fmStats24 || mvStats24) {
@@ -294,7 +263,6 @@ async function selectPlayer(cod, idx){
       rankHTML += '<div class="small"><em>Z-score: quante deviazioni standard sei sopra/sotto la media del ruolo (0 = media).</em></div>';
       $('#card2024').innerHTML += rankHTML;
     }
-
     // Badge accanto al nome: Top 10% + Posizione (colore dinamico)
     const _metaEl = $('#playerMeta');
     if (_metaEl) {
@@ -308,8 +276,7 @@ async function selectPlayer(cod, idx){
           `<span class="badge good" title="${escapeHtml(_tops.join(' · '))}">Top 10% nel ruolo</span>`
         );
       }
-
-      // Badge posizione assoluta: FM/MV secondo preferenza (o migliore)
+      // Badge posizione assoluta: FM/MV secondo preferenza (o migliore) – RUOLO 2024 (già esistente)
       const bmPref = getBadgeMetric(); // 'fm' | 'mv' | 'best'
       let picked = null;
       if (bmPref==='fm' && fmStats24) picked = {label:'FM', rank: fmStats24.rank, N: fmStats24.N};
@@ -329,12 +296,39 @@ async function selectPlayer(cod, idx){
         _metaEl.insertAdjacentHTML('beforeend',
           `<span class="badge ${cls}" title="${escapeHtml(title)}">${picked.rank}° su ${picked.N}</span>`);
       }
-    }
 
+      // --- NUOVO: Badge Ranking ruolo 2025 (stat 2024 confrontate con ruolo 2025) ---
+      try{
+        const fmTarget24 = computeRoleStats2024('fmt', p24?.fmt, rTarget);
+        const mvTarget24 = computeRoleStats2024('mvt', p24?.mvt, rTarget);
+        if (rTarget && (fmTarget24 || mvTarget24)) {
+          const bmPrefT = getBadgeMetric(); // 'fm' | 'mv' | 'best'
+          let pickedT = null;
+          if (bmPrefT==='fm' && fmTarget24) pickedT = {label:'FM', rank: fmTarget24.rank, N: fmTarget24.N};
+          else if (bmPrefT==='mv' && mvTarget24) pickedT = {label:'MV', rank: mvTarget24.rank, N: mvTarget24.N};
+          else {
+            const arr=[]; if (fmTarget24) arr.push({label:'FM', rank: fmTarget24.rank, N: fmTarget24.N});
+            if (mvTarget24) arr.push({label:'MV', rank: mvTarget24.rank, N: mvTarget24.N});
+            if (arr.length){ arr.sort((a,b)=>a.rank-b.rank); pickedT = arr[0]; }
+          }
+          if (pickedT){
+            const fracT = pickedT.rank / pickedT.N;
+            const clsT  = (fracT <= 0.10) ? 'good' : 'info';
+            const titlePartsT = [];
+            if (fmTarget24) titlePartsT.push(`FM→R25: ${fmTarget24.rank}° su ${fmTarget24.N}`);
+            if (mvTarget24) titlePartsT.push(`MV→R25: ${mvTarget24.rank}° su ${mvTarget24.N}`);
+            const titleT = titlePartsT.join(' · ');
+            _metaEl.insertAdjacentHTML(
+              'beforeend',
+              `<span class="badge ${clsT}" title="${escapeHtml(titleT)}">Ranking ruolo 2025 ${pickedT.rank}° su ${pickedT.N}</span>`
+            );
+          }
+        }
+      }catch(e){ /* no-op */ }
+    }
   } else {
     $('#card2024').innerHTML = '<div class=small>Dati 2024 non disponibili.</div>';
   }
-
   let srec=null; try{
     if(!storico){ storico=await fetchJSON('storico.json') }
     srec=(storico||[]).find(x=>normCod(x.cod)===codN);
@@ -348,7 +342,6 @@ async function selectPlayer(cod, idx){
       const part1 = part1rows? `<h4 class=\"sect\" title=\"${escapeHtml(SECT_TIPS.perPres)}\">Statistiche per presenza</h4>${part1rows}` : '';
       const part2 = part2rows? `<h4 class=\"sect\" title=\"${escapeHtml(SECT_TIPS.futures)}\">Futures</h4>${part2rows}` : '';
       $('#cardStorico').innerHTML = part0 + part1 + part2 || '<div class=small>Nessun dato storico da mostrare.</div>';
-
       // Nascoste = gruppi spenti
       let hiddenRows='';
       if(!groups.perPres){ hiddenRows += PER_PRES.filter(k=> (k in srec)&&!HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('') }
@@ -363,10 +356,8 @@ async function selectPlayer(cod, idx){
     $('#cardHidden').innerHTML='';
     console.warn('Errore storico.json',e)
   }
-
   addTopBadges(rec25,p24,srec);
 }
-
 // ===== Role stats 2024 (cache + percentile & z-score) =====
 const ROLE_CACHE_2024 = {}; // role -> metric -> {vals,N,mean,std}
 function getRoleDist2024(role, metric){
@@ -394,7 +385,6 @@ function computeRoleStats2024(metric, value, role){
     if(!distr || !Number.isFinite(v)) return null;
     const { vals, N, mean, std } = distr;
     if(!N) return null;
-
     // Conta quanti valori sono < v e quanti == v
     const eps = 1e-9;
     let less = 0, equal = 0;
@@ -402,32 +392,25 @@ function computeRoleStats2024(metric, value, role){
       if (x < v - eps) less++;
       else if (Math.abs(x - v) <= eps) equal++;
     }
-
     // Percentile (0..1), coerente con il midrank (più è alto → meglio è)
     const mid = less + 0.5 * equal;
     const pct = mid / N;
-
     // Z-score rispetto a media e dev. standard del ruolo
     const z = std > 0 ? (v - mean) / std : 0;
-
     // === RANK MINIMO in ordine DECRESCENTE (1 = migliore) ===
     // #strettamente_maggiori = N - (less + equal)
     // rank_min_desc = (N - (less + equal)) + 1
     const rank = Math.max(1, N - (less + equal) + 1);
-
     return { pct, z, N, mean, std, rank };
   } catch {
     return null;
   }
 }
-
 function rowSimple(label, value){
   const display = (typeof value === 'number') ? fmtValue(value) : String(value);
   return `<div class="row"><span class="key">${escapeHtml(label)}</span><span class="val">${display}</span></div>`;
 }
-
 // ===== Shortcuts =====
 document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&(e.key==='q'||e.key==='Q')){ const el=$('#searchInput'); if(el){ e.preventDefault(); el.focus(); el.select?.(); showResults() } } });
-
 // ===== Init =====
 (async function init(){ try{ await loadIndex() }catch(e){ console.warn(e) } setupTheme(); setupToggles(); buildOptionsUI(); })();
