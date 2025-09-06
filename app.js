@@ -389,57 +389,23 @@ function getRoleDist2024(role, metric){
 }
 function computeRoleStats2024(metric, value, role){
   try{
-    const v = Number(value);
-
-    // Usa la cache se disponibile (getRoleDist2024), altrimenti fallback locale
-    const distr = (typeof getRoleDist2024 === 'function')
-      ? getRoleDist2024(role, metric)
-      : (()=>{
-          const r=(role??'').toUpperCase();
-          if(!data2024||!r) return null;
-          const vals = data2024
-            .filter(rec => ((rec.r ?? rec.role ?? '').toUpperCase()===r))
-            .map(rec => Number(rec[metric]))
-            .filter(n => Number.isFinite(n))
-            .sort((a,b)=>a-b);
-          const N = vals.length;
-          if(!N) return null;
-          const mean = vals.reduce((a,b)=>a+b,0)/N;
-          const variance = vals.reduce((a,b)=>a + Math.pow(b-mean,2),0)/N;
-          const std = Math.sqrt(variance);
-          return { vals, N, mean, std };
-        })();
-
-    if(!distr || !Number.isFinite(v)) return null;
-    const { vals, N, mean, std } = distr;
+    const v=Number(value);
+    const distr = getRoleDist2024(role, metric);
+    if(!distr||!Number.isFinite(v)) return null;
+    const {vals,N,mean,std} = distr;
     if(!N) return null;
-
-    // Conta valori < v e == v
-    const eps = 1e-9;
-    let less = 0, equal = 0;
-    for(const x of vals){
-      if (x < v - eps) less++;
-      else if (Math.abs(x - v) <= eps) equal++;
-    }
-
-    // Percentile coerente col midrank (0..1; più alto = meglio)
-    const mid = less + 0.5*equal;
-    const pct = mid / N;
-
-    // Z-score
-    const z = std > 0 ? (v - mean) / std : 0;
-
-    // === RANK MINIMO in ordine DECRESCENTE (1 = migliore) ===
-    // #strettamente_maggiori = N - (less + equal)
-    // rank_min_desc = (N - (less + equal)) + 1
-    const rank = Math.max(1, N - (less + equal) + 1);
-
-    return { pct, z, N, mean, std, rank };
-  }catch{
-    return null;
-  }
+    const eps=1e-9; let less=0, equal=0;
+    for(const x of vals){ if(x < v - eps) less++; else if(Math.abs(x-v)<=eps) equal++; }
+    const pct=(less + 0.5*equal)/N;      // 0..1 (midrank)
+    const z= std>0 ? (v-mean)/std : 0;   // z-score
+    const rankMid = Math.max(1, Math.round( less + (equal ? (equal+1)/2 : 1 ) )); // posizione k
+    return {pct, z, N, mean, std, rank: rankMid};
+  }catch{ return null; }
 }
-
+function rowSimple(label, value){
+  const display = (typeof value === 'number') ? fmtValue(value) : String(value);
+  return `<div class="row"><span class="key">${escapeHtml(label)}</span><span class="val">${display}</span></div>`;
+}
 
 // ===== Shortcuts =====
 document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&(e.key==='q'||e.key==='Q')){ const el=$('#searchInput'); if(el){ e.preventDefault(); el.focus(); el.select?.(); showResults() } } });
