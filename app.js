@@ -193,7 +193,54 @@ async function selectPlayer(cod, idx){
   if(rec25){ const rf=(rec25?.r||role||'').toUpperCase().trim(); let main25; if(rf==='P'){ main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gs','gsr','as','a','e'] } else { main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'] } const parts=[]; parts.push(listKVctx(rec25,main25,'2025')); if(rec25.cambio_squadra===true||rec25.cambio_ruolo===true){ wrap25?.classList.add('card--attention') } $('#card2025').innerHTML=parts.join('') } else { $('#card2025').innerHTML='<div class=small>Giocatore non trovato nel 2025.json</div>' }
 
   let p24=null; if(data2024){ const m24=indexByCOD(data2024); p24=m24.get(codN) }
-  if(p24){ const r24=(p24?.r||role||'').toUpperCase().trim(); let main24; if(r24==='P'){ main24=['r','sq','aff','p','mvt','fmt','gs','gsr','rp','as','ag','a','e'] } else { main24=['r','sq','aff','p','mvt','fmt','gf','gfr','rs','as','ag','a','e'] } $('#card2024').innerHTML=listKVctx(p24,main24,'2024') } else { $('#card2024').innerHTML='<div class=small>Dati 2024 non disponibili.</div>' }
+  if (p24) {
+  const r24 = (p24?.r || role || '').toUpperCase().trim();
+  let main24;
+  if (r24 === 'P') {
+    main24 = ['r','sq','aff','p','mvt','fmt','gs','gsr','rp','as','ag','a','e'];
+  } else {
+    main24 = ['r','sq','aff','p','mvt','fmt','gf','gfr','rs','as','ag','a','e'];
+  }
+
+  // Render standard 2024
+  $('#card2024').innerHTML = listKVctx(p24, main24, '2024');
+
+  // === NUOVO: percentile & z-score nel ruolo (2024) + badge Top 10% ===
+  const fmStats24 = computeRoleStats2024('fmt', p24?.fmt, r24);
+  const mvStats24 = computeRoleStats2024('mvt', p24?.mvt, r24);
+
+  // Sezione "Posizione nel ruolo (2024)"
+  let rankHTML = '';
+  if (fmStats24 || mvStats24) {
+    rankHTML += '<h4 class="sect">Posizione nel ruolo (2024)</h4>';
+    if (fmStats24) {
+      rankHTML += rowSimple('FM 2024 – Percentile', fmtPercent01(fmStats24.pct));
+      rankHTML += rowSimple('FM 2024 – Z\u200a-score', fmStats24.z);
+    }
+    if (mvStats24) {
+      rankHTML += rowSimple('MV 2024 – Percentile', fmtPercent01(mvStats24.pct));
+      rankHTML += rowSimple('MV 2024 – Z\u200a-score', mvStats24.z);
+    }
+    $('#card2024').innerHTML += rankHTML;
+  }
+
+  // Badge accanto al nome se Top 10% in almeno una metrica
+  const _metaEl = $('#playerMeta');
+  if (_metaEl) {
+    const _tops = [];
+    if (fmStats24?.pct >= 0.90) _tops.push(`FM 2024 ${fmtPercent01(fmStats24.pct)}`);
+    if (mvStats24?.pct >= 0.90) _tops.push(`MV 2024 ${fmtPercent01(mvStats24.pct)}`);
+    if (_tops.length) {
+      _metaEl.insertAdjacentHTML(
+        'beforeend',
+        `<span class="badge good" title="${escapeHtml(_tops.join(' · '))}">Top 10% nel ruolo</span>`
+      );
+    }
+  }
+} else {
+  $('#card2024').innerHTML = '<div class=small>Dati 2024 non disponibili.</div>';
+}
+
 
   let srec=null; try{ if(!storico){ storico=await fetchJSON('storico.json') } srec=(storico||[]).find(x=>normCod(x.cod)===codN); if(srec){
       const groups=getGroups();
@@ -215,6 +262,46 @@ async function selectPlayer(cod, idx){
   }catch(e){ $('#cardStorico').innerHTML='<div class=small>Storico non disponibile.</div>'; $('#cardHidden').innerHTML=''; console.warn('Errore storico.json',e) }
 
   addTopBadges(rec25,p24,srec);
+}
+// ===== Role stats 2024 (percentile & z-score) =====
+function computeRoleStats2024(metric, value, role){
+  try{
+    const v = Number(value);
+    const r = (role??'').toUpperCase();
+    if(!data2024 || !Number.isFinite(v) || !r) return null;
+
+    // Prendiamo tutti i valori della metrica nel medesimo ruolo dalla tabella 2024
+    const vals = data2024
+      .filter(rec => ((rec.r ?? rec.role ?? '').toUpperCase() === r))
+      .map(rec => Number(rec[metric]))
+      .filter(n => Number.isFinite(n))
+      .sort((a,b)=>a-b);
+
+    const N = vals.length;
+    if(!N) return null;
+
+    // Media e dev. standard (popolazione) per z-score
+    const mean = vals.reduce((a,b)=>a+b,0)/N;
+    const variance = vals.reduce((a,b)=>a + Math.pow(b-mean,2),0)/N;
+    const std = Math.sqrt(variance);
+
+    // Percentile midrank: gestisce i pari valorizzando a metà dell'intervallo
+    const eps = 1e-9;
+    let less=0, equal=0;
+    for(const x of vals){
+      if(x < v - eps) less++;
+      else if(Math.abs(x - v) <= eps) equal++;
+    }
+    const pct = (less + 0.5*equal)/N; // 0..1
+    const z = std>0 ? (v - mean)/std : 0;
+
+    return {pct, z, N, mean, std};
+  }catch{ return null; }
+}
+
+function rowSimple(label, value){
+  const display = (typeof value === 'number') ? fmtValue(value) : String(value);
+  return `<div class="row"><span class="key">${escapeHtml(label)}</span><span class="val">${display}</span></div>`;
 }
 
 // ===== Shortcuts =====
