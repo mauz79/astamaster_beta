@@ -158,7 +158,7 @@ function buildOptionsUI(){
 // ===== Badges header (inclusi Affidabilità) =====
 function addTopBadges(rec25,p24,srec){ const wrap=$('#playerBadges'); if(!wrap) return; const out=[]; const thr=getThresholds(); if(rec25?.cambio_ruolo===true) out.push('<span class="badge warn">Cambio Ruolo</span>'); const isCambioSq=rec25?.cambio_squadra===true; const isNew=(srec?.oldsq&&String(srec.oldsq).toLowerCase()==='new'); if(isNew) out.push('<span class="badge info">Nuovo acquisto</span>'); else if(isCambioSq) out.push('<span class="badge alert">Cambio Squadra</span>'); const mv2024=+p24?.mvt, fm2024=+p24?.fmt; if(Number.isFinite(mv2024)&&mv2024>thr.mv2024) out.push(`<span class="badge good">MV 2024 > ${thr.mv2024}</span>`); if(Number.isFinite(fm2024)&&fm2024>thr.fm2024) out.push(`<span class="badge good">FM 2024 > ${thr.fm2024}</span>`); const mvMed=+srec?.mvt_media_stagione, fmMed=+srec?.fmt_media_stagione; if(Number.isFinite(mvMed)&&mvMed>thr.mvMed) out.push(`<span class="badge good">MV medio > ${thr.mvMed}</span>`); if(Number.isFinite(fmMed)&&fmMed>thr.fmMed) out.push(`<span class="badge good">FM media > ${thr.fmMed}</span>`);
   let aff24 = Number(p24?.aff); if(Number.isFinite(aff24)){ if(aff24>1) aff24/=100; if(aff24>0.66) out.push('<span class="badge good">Aff 2024 > 66%</span>'); }
-  const affMed = Number(srec?.aff_media_stagione); if(Number.isFinite(affMed) && affMed>0.66) out.push('<span class="badge good">Aff media > 0.66</span>');
+  const affMed = Number(srec?.aff_media_stagione); if(Number.isFinite(affMed) && affMed>0.66) out.push('<span class="badge good">Aff media > 66%</span>');
   wrap.innerHTML=out.join(' ') }
 
 // ===== Expandable (card Nascoste) =====
@@ -182,7 +182,7 @@ async function selectPlayer(cod, idx){
   if(rec25){ const rf=(rec25?.r||role||'').toUpperCase().trim(); let main25; if(rf==='P'){ main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gs','gsr','as','a','e'] } else { main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'] } const parts=[]; parts.push(listKVctx(rec25,main25,'2025')); if(rec25.cambio_squadra===true||rec25.cambio_ruolo===true){ wrap25?.classList.add('card--attention') } $('#card2025').innerHTML=parts.join('') } else { $('#card2025').innerHTML='<div class=small>Giocatore non trovato nel 2025.json</div>' }
 
   let p24=null; if(data2024){ const m24=indexByCOD(data2024); p24=m24.get(codN) }
-  if(p24){ const r24=(p24?.r||role||'').toUpperCase().trim(); let main24; if(r24==='P'){ main24=['r','sq','aff','p','mvt','fmt','gs','gsr','as','a','e'] } else { main24=['r','sq','aff','p','mvt','fmt','gf','gfr','as','a','e'] } $('#card2024').innerHTML=listKVctx(p24,main24,'2024') } else { $('#card2024').innerHTML='<div class=small>Dati 2024 non disponibili.</div>' }
+  if(p24){ const r24=(p24?.r||role||'').toUpperCase().trim(); let main24; if(r24==='P'){ main24=['r','sq','aff','p','mvt','fmt','gs','gsr','rp','as','ag','a','e'] } else { main24=['r','sq','aff','p','mvt','fmt','gf','gfr','rs','as','ag','a','e'] } $('#card2024').innerHTML=listKVctx(p24,main24,'2024') } else { $('#card2024').innerHTML='<div class=small>Dati 2024 non disponibili.</div>' }
 
   let srec=null; try{ if(!storico){ storico=await fetchJSON('storico.json') } srec=(storico||[]).find(x=>normCod(x.cod)===codN); if(srec){
       const groups=getGroups();
