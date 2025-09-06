@@ -51,20 +51,18 @@ const HIDE_STORICO = new Set([
 ]);
 
 // Iconcine SOLO per 2024 e Storico
-
 const ICONS = {
   gf: '⚽',
-  gfr: '🅁⚽',        // gol su rigore
-  ag: '🔴⚽',        // autogol
-  rs: '🅁🔴⚽',      // rigore sbagliato
-  gs: '🔴🧤',        // gol subiti
-  gsr: '🅁🔴🧤',    // gol subiti su rigore
-  rp: '🅁🟢🧤',    // rigori parati
+  gfr: '🅁⚽', // gol su rigore
+  ag: '🔴⚽', // autogol
+  rs: '🅁🔴⚽', // rigore sbagliato
+  gs: '🔴🧤', // gol subiti
+  gsr: '🅁🔴🧤', // gol subiti su rigore
+  rp: '🅁🟢🧤', // rigori parati
   as: '🎯',
-  a:  '🟨',
-  e:  '🟥'
+  a: '🟨',
+  e: '🟥'
 };
-
 
 // Tooltips per le sezioni Storico
 const SECT_TIPS = {
@@ -77,7 +75,7 @@ const SECT_TIPS = {
 const $ = sel => document.querySelector(sel);
 function fmtValue(v){ if(v===null||v===undefined) return '—'; const n = typeof v==='number'? v : Number(String(v).replace(',','.')); if(!Number.isFinite(n)) return String(v); return Number(n.toFixed(3)).toString(); }
 function fmtPercent01(x){ if(x===null||x===undefined) return '—'; let v=Number(x); if(!Number.isFinite(v)) return String(x); if(v<=1) v*=100; return Number(v.toFixed(1)).toString()+'%'; }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&','<':'<','>':'>','"':'"','\'':'&#39;'}[c])); }
+function escapeHtml(s){ return String(s).replace(/[&<>\"']/g, c=>({'&':'&','<':'<','>':'>','"':'"','\'':'&#39;'}[c])); }
 function rowKVctx(label,val,key,ctx){ const ico=(ctx!=='2025' && ICONS[key])? `<span class="ico">${ICONS[key]}</span>` : ''; const display = (key==='aff_media_stagione') ? fmtPercent01(val) : fmtValue(val); return `<div class="row"><span class="key">${ico}${label}</span><span class="val">${display}</span></div>` }
 function listKVctx(obj,keys,ctx){ return keys.filter(k=>k in obj).map(k=>rowKVctx(LABELS[k]||LABELS_STORICO[k]||k,obj[k],k,ctx)).join('') }
 async function fetchJSON(f){ const r=await fetch(DATA_BASE+f,{cache:'no-store'}); if(!r.ok) throw new Error('Impossibile caricare '+f+' ('+r.status+')'); return r.json() }
@@ -92,12 +90,15 @@ let INDEX=[], data2025=null, data2024=null, storico=null, map2025=null;
 async function loadIndex(){ try{ INDEX=await fetchJSON('index.json') }catch(e){ console.warn('index.json non trovato',e) } }
 function hideResults(){ $('#panelResults')?.classList.add('hidden') }
 function showResults(){ $('#panelResults')?.classList.remove('hidden') }
-function renderResults(items,q){ const ul=$('#results'); ul.innerHTML=''; items.slice(0,50).forEach(item=>{ const li=document.createElement('li'); li.className='result-item'; li.setAttribute('role','option'); li.tabIndex=0; const title=`<span class=\"result-title\">${highlightMatch(item.nome||'', q)}</span>`; const meta=`<span class=\"result-meta\">${escapeHtml(item.ruolo_2025||'—')} · ${escapeHtml(item.squadra_2025||'—')}</span>`; li.innerHTML=`${title}<span>${meta}</span>`; li.addEventListener('click',()=>selectPlayer(item.cod,item)); li.addEventListener('keypress',(e)=>{if(e.key==='Enter') selectPlayer(item.cod,item)}); ul.appendChild(li) }) }
+function renderResults(items,q){ const ul=$('#results'); ul.innerHTML=''; items.slice(0,50).forEach(item=>{ const li=document.createElement('li'); li.className='result-item'; li.setAttribute('role','option'); li.tabIndex=0; const title=`<span class="result-title">${highlightMatch(item.nome||'', q)}</span>`; const meta=`<span class="result-meta">${escapeHtml(item.ruolo_2025||'—')} · ${escapeHtml(item.squadra_2025||'—')}</span>`; li.innerHTML=`${title}<span>${meta}</span>`; li.addEventListener('click',()=>selectPlayer(item.cod,item)); li.addEventListener('keypress',(e)=>{if(e.key==='Enter') selectPlayer(item.cod,item)}); ul.appendChild(li) }) }
 function search(q){ const nq=norm(q.trim()); if(!nq){ $('#results').innerHTML=''; return } const res=INDEX.filter(x=>norm(x.nome).includes(nq)); renderResults(res,q) }
 let debounceTimer; document.getElementById('searchInput').addEventListener('input', e=>{ showResults(); clearTimeout(debounceTimer); const v=e.target.value; debounceTimer=setTimeout(()=>search(v),140) })
 
 // ===== Data loading =====
-async function ensureYear(y){ if(y===2025 && !data2025){ data2025=await fetchJSON('2025.json'); map2025=new Map(data2025.filter(r=>r.cod!=null||r.COD!=null).map(r=>[normCod(r.cod??r.COD), r])) } if(y===2024 && !data2024){ data2024=await fetchJSON('2024.json') } }
+async function ensureYear(y){ 
+  if(y===2025 && !data2025){ data2025=await fetchJSON('2025.json'); map2025=new Map(data2025.filter(r=>r.cod!=null||r.COD!=null).map(r=>[normCod(r.cod??r.COD), r])) } 
+  if(y===2024 && !data2024){ data2024=await fetchJSON('2024.json') } 
+}
 function indexByCOD(recs){ const m=new Map(); for(const r of recs){ const cod=(r.cod??r.COD??r.id??r.Id); if(cod!=null) m.set(normCod(cod),r) } return m }
 
 // ===== Photo =====
@@ -106,7 +107,7 @@ function setPlayerPhoto(cod){ const img=$('#playerPhoto'); if(!img) return; let 
 
 // ===== Toggles (card visibility + theme) =====
 const TOGGLE_KEYS={ y2025:'toggle-2025', storico:'toggle-storico' };
-function applyToggles(){ const t25=localStorage.getItem(TOGGLE_KEYS.y2025)!=='off'; const ts=localStorage.getItem(TOGGLE_KEYS.storico)!=='off'; $('#wrap2025')?.classList.toggle('hidden',!t25); $('#wrapStorico')?.classList.toggle('hidden',!ts); const s25=$('#switch2025'); if(s25) s25.checked=t25; const ss=$('#switchStorico'); if(ss) ss.checked=ts }
+function applyToggles(){ const t25=localStorage.getItem(TOGGLE_KEYS.y2025)!=='off'; const ts=localStorage.getItem(TOGGLE_KEYS.storico)!=='off'; $('#wrap2025')?.classList.toggle('hidden',!t25); $('#wrapStorico')?.classList.toggle('hidden',!ts); const s25=$('#switch2025'); if(s25) s25.checked=(t25); const ss=$('#switchStorico'); if(ss) ss.checked=(ts) }
 function setupToggles(){ $('#switch2025')?.addEventListener('change',e=>{ localStorage.setItem(TOGGLE_KEYS.y2025, e.target.checked?'on':'off'); applyToggles() }); $('#switchStorico')?.addEventListener('change',e=>{ localStorage.setItem(TOGGLE_KEYS.storico, e.target.checked?'on':'off'); applyToggles() }); applyToggles(); }
 
 const THEME_KEY='astamaster-theme';
@@ -123,13 +124,17 @@ function saveThresholds(t){ localStorage.setItem(LS_THRESH, JSON.stringify(t)) }
 const LS_STO_GROUPS='astamaster-storico-groups';
 function getGroups(){ try{ const g=JSON.parse(localStorage.getItem(LS_STO_GROUPS)||'{}'); return { perPres: g.perPres!==false, futures: g.futures!==false } }catch{ return { perPres:true, futures:true } } }
 function saveGroups(g){ localStorage.setItem(LS_STO_GROUPS, JSON.stringify(g)) }
-
 function storicoSectionOrder(){
   const DATI_STAT = ['p_tot_4stag','cambio_ruolo_descr','p_media_stagione','aff_media_stagione','mvt_media_stagione','fmt_media_stagione','gf_media_stagione','as_media_stagione','gs_media_stagione','rp_media_stagione','a_media_stagione','e_media_stagione'];
   const PER_PRES = ['presenze_per_gol','presenze_per_assist','presenze_per_ammonizione','presenze_per_espulsione','gs_per_presenza','rp_per_presenza','presenze_per_rp'];
-  const FUTURES  = ['gf_media_stagione_norm','as_media_stagione_norm','a_media_stagione_norm','e_media_stagione_norm','gs_media_stagione_norm','rp_media_stagione_norm'];
+  const FUTURES = ['gf_media_stagione_norm','as_media_stagione_norm','a_media_stagione_norm','e_media_stagione_norm','gs_media_stagione_norm','rp_media_stagione_norm'];
   return { DATI_STAT, PER_PRES, FUTURES };
 }
+
+// ===== Preferenza utente: metrica per il badge posizione =====
+const LS_BADGE_METRIC='astamaster-badge-metric';
+function getBadgeMetric(){ const v=localStorage.getItem(LS_BADGE_METRIC); return (v==='fm'||v==='mv'||v==='best')? v : 'best'; }
+function saveBadgeMetric(v){ if(v==='fm'||v==='mv'||v==='best') localStorage.setItem(LS_BADGE_METRIC, v); }
 
 // ===== Options UI =====
 function buildOptionsUI(){
@@ -158,19 +163,67 @@ function buildOptionsUI(){
     localStorage.removeItem(TOGGLE_KEYS.y2025);
     localStorage.removeItem(TOGGLE_KEYS.storico);
     localStorage.removeItem(THEME_KEY);
+    localStorage.removeItem(LS_BADGE_METRIC); // <-- pulisci preferenza badge posizione
     // Re-applica default
     setupTheme();
     applyToggles();
     buildOptionsUI();
     alert('Impostazioni ripristinate.');
   });
+
+  // --- Badge posizione: UI dinamica (FM/MV/Migliore) ---
+  try{
+    const wrapper = document.querySelector('.options__body') || document.querySelector('details.options');
+    if(wrapper && !document.getElementById('opt_badge_best')){
+      const fs = document.createElement('fieldset');
+      fs.innerHTML = `
+        <legend>Badge posizione</legend>
+        <div class="grid-2">
+          <label><input type="radio" name="badgeMetric" id="opt_badge_best" value="best"> Migliore (FM o MV)</label>
+          <label><input type="radio" name="badgeMetric" id="opt_badge_fm" value="fm"> FM</label>
+          <label><input type="radio" name="badgeMetric" id="opt_badge_mv" value="mv"> MV</label>
+        </div>`;
+      wrapper.appendChild(fs);
+    }
+    const bm = getBadgeMetric();
+    const rbBest=document.getElementById('opt_badge_best');
+    const rbFm=document.getElementById('opt_badge_fm');
+    const rbMv=document.getElementById('opt_badge_mv');
+    if(rbBest) rbBest.checked=(bm==='best');
+    if(rbFm)   rbFm.checked  =(bm==='fm');
+    if(rbMv)   rbMv.checked  =(bm==='mv');
+    [rbBest,rbFm,rbMv].forEach(el=>{ el && el.addEventListener('change', ()=>{
+      const val = rbBest?.checked ? 'best' : (rbFm?.checked ? 'fm' : (rbMv?.checked ? 'mv' : 'best'));
+      saveBadgeMetric(val);
+      // La scelta si applica alla prossima selezione del giocatore.
+    });});
+  }catch(e){ console.warn('Badge metric options not available', e); }
 }
 
 // ===== Badges header (inclusi Affidabilità) =====
-function addTopBadges(rec25,p24,srec){ const wrap=$('#playerBadges'); if(!wrap) return; const out=[]; const thr=getThresholds(); if(rec25?.cambio_ruolo===true) out.push('<span class="badge warn">Cambio Ruolo</span>'); const isCambioSq=rec25?.cambio_squadra===true; const isNew=(srec?.oldsq&&String(srec.oldsq).toLowerCase()==='new'); if(isNew) out.push('<span class="badge info">Nuovo acquisto</span>'); else if(isCambioSq) out.push('<span class="badge alert">Cambio Squadra</span>'); const mv2024=+p24?.mvt, fm2024=+p24?.fmt; if(Number.isFinite(mv2024)&&mv2024>thr.mv2024) out.push(`<span class="badge good">MV 2024 > ${thr.mv2024}</span>`); if(Number.isFinite(fm2024)&&fm2024>thr.fm2024) out.push(`<span class="badge good">FM 2024 > ${thr.fm2024}</span>`); const mvMed=+srec?.mvt_media_stagione, fmMed=+srec?.fmt_media_stagione; if(Number.isFinite(mvMed)&&mvMed>thr.mvMed) out.push(`<span class="badge good">MV medio > ${thr.mvMed}</span>`); if(Number.isFinite(fmMed)&&fmMed>thr.fmMed) out.push(`<span class="badge good">FM media > ${thr.fmMed}</span>`);
-  let aff24 = Number(p24?.aff); if(Number.isFinite(aff24)){ if(aff24>1) aff24/=100; if(aff24>0.66) out.push('<span class="badge good">Aff 2024 > 66%</span>'); }
-  const affMed = Number(srec?.aff_media_stagione); if(Number.isFinite(affMed) && affMed>0.66) out.push('<span class="badge good">Aff media > 66%</span>');
-  wrap.innerHTML=out.join(' ') }
+function addTopBadges(rec25,p24,srec){ 
+  const wrap=$('#playerBadges'); if(!wrap) return; 
+  const out=[]; const thr=getThresholds();
+  if(rec25?.cambio_ruolo===true) out.push('<span class="badge warn">Cambio Ruolo</span>');
+  const isCambioSq=rec25?.cambio_squadra===true; const isNew=(srec?.oldsq&&String(srec.oldsq).toLowerCase()==='new');
+  if(isNew) out.push('<span class="badge info">Nuovo acquisto</span>');
+  else if(isCambioSq) out.push('<span class="badge alert">Cambio Squadra</span>');
+
+  const mv2024=+p24?.mvt, fm2024=+p24?.fmt;
+  if(Number.isFinite(mv2024)&&mv2024>thr.mv2024) out.push(`<span class="badge good">MV 2024 > ${thr.mv2024}</span>`);
+  if(Number.isFinite(fm2024)&&fm2024>thr.fm2024) out.push(`<span class="badge good">FM 2024 > ${thr.fm2024}</span>`);
+
+  const mvMed=+srec?.mvt_media_stagione, fmMed=+srec?.fmt_media_stagione;
+  if(Number.isFinite(mvMed)&&mvMed>thr.mvMed) out.push(`<span class="badge good">MV medio > ${thr.mvMed}</span>`);
+  if(Number.isFinite(fmMed)&&fmMed>thr.fmMed) out.push(`<span class="badge good">FM media > ${thr.fmMed}</span>`);
+
+  let aff24 = Number(p24?.aff);
+  if(Number.isFinite(aff24)){ if(aff24>1) aff24/=100; if(aff24>0.66) out.push('<span class="badge good">Aff 2024 > 66%</span>'); }
+  const affMed = Number(srec?.aff_media_stagione);
+  if(Number.isFinite(affMed) && affMed>0.66) out.push('<span class="badge good">Aff media > 66%</span>');
+
+  wrap.innerHTML=out.join(' ')
+}
 
 // ===== Expandable (card Nascoste) =====
 document.addEventListener('click', (e)=>{ const h3 = e.target.closest('.expandable h3'); if(h3){ const card=h3.closest('.expandable'); card?.classList.toggle('collapsed'); }});
@@ -186,63 +239,106 @@ async function selectPlayer(cod, idx){
   $('#card2024').innerHTML='<span class=spinner aria-label=caricamento></span>';
   $('#cardStorico').innerHTML='<span class=spinner aria-label=caricamento></span>';
   $('#cardHidden').innerHTML='<span class=spinner aria-label=caricamento></span>';
-  await ensureYear(2025); await ensureYear(2024);
-  const codN=normCod(cod); const rec25=map2025? map2025.get(codN) : null;
 
+  await ensureYear(2025); await ensureYear(2024);
+
+  const codN=normCod(cod); const rec25=map2025? map2025.get(codN) : null;
   const wrap25=$('#wrap2025'); wrap25?.classList.remove('card--attention');
-  if(rec25){ const rf=(rec25?.r||role||'').toUpperCase().trim(); let main25; if(rf==='P'){ main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gs','gsr','as','a','e'] } else { main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'] } const parts=[]; parts.push(listKVctx(rec25,main25,'2025')); if(rec25.cambio_squadra===true||rec25.cambio_ruolo===true){ wrap25?.classList.add('card--attention') } $('#card2025').innerHTML=parts.join('') } else { $('#card2025').innerHTML='<div class=small>Giocatore non trovato nel 2025.json</div>' }
+
+  if(rec25){
+    const rf=(rec25?.r||role||'').toUpperCase().trim();
+    let main25;
+    if(rf==='P'){ main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gs','gsr','as','a','e'] }
+    else { main25=['r','sq','p','mvt','fmt','mvc','mvf','fmc','fmf','aff','gf','as','a','e'] }
+    const parts=[];
+    parts.push(listKVctx(rec25,main25,'2025'));
+    if(rec25.cambio_squadra===true||rec25.cambio_ruolo===true){ wrap25?.classList.add('card--attention') }
+    $('#card2025').innerHTML=parts.join('')
+  } else {
+    $('#card2025').innerHTML='<div class=small>Giocatore non trovato nel 2025.json</div>'
+  }
 
   let p24=null; if(data2024){ const m24=indexByCOD(data2024); p24=m24.get(codN) }
+
   if (p24) {
-  const r24 = (p24?.r || role || '').toUpperCase().trim();
-  let main24;
-  if (r24 === 'P') {
-    main24 = ['r','sq','aff','p','mvt','fmt','gs','gsr','rp','as','ag','a','e'];
+    const r24 = (p24?.r || role || '').toUpperCase().trim();
+    let main24;
+    if (r24 === 'P') {
+      main24 = ['r','sq','aff','p','mvt','fmt','gs','gsr','rp','as','ag','a','e'];
+    } else {
+      main24 = ['r','sq','aff','p','mvt','fmt','gf','gfr','rs','as','ag','a','e'];
+    }
+    // Render standard 2024
+    $('#card2024').innerHTML = listKVctx(p24, main24, '2024');
+
+    // === Percentile & z-score nel ruolo (2024) + posizione assoluta + note ===
+    const fmStats24 = computeRoleStats2024('fmt', p24?.fmt, r24);
+    const mvStats24 = computeRoleStats2024('mvt', p24?.mvt, r24);
+
+    // Sezione "Posizione nel ruolo (2024)"
+    let rankHTML = '';
+    if (fmStats24 || mvStats24) {
+      rankHTML += '<h4 class="sect">Posizione nel ruolo (2024)</h4>';
+      if (fmStats24) {
+        const fmPctTxt = `${fmtPercent01(fmStats24.pct)} (${fmStats24.rank}° su ${fmStats24.N})`;
+        rankHTML += rowSimple('FM 2024 – Percentile', fmPctTxt);
+        rankHTML += rowSimple('FM 2024 – Z\u200a-score', fmStats24.z);
+      }
+      if (mvStats24) {
+        const mvPctTxt = `${fmtPercent01(mvStats24.pct)} (${mvStats24.rank}° su ${mvStats24.N})`;
+        rankHTML += rowSimple('MV 2024 – Percentile', mvPctTxt);
+        rankHTML += rowSimple('MV 2024 – Z\u200a-score', mvStats24.z);
+      }
+      // Note esplicative (in piccolo e corsivo)
+      rankHTML += '<div class="small"><em>Percentile: percentuale di giocatori del tuo ruolo con metrica ≤ al tuo valore (0–100%).</em></div>';
+      rankHTML += '<div class="small"><em>Z-score: quante deviazioni standard sei sopra/sotto la media del ruolo (0 = media).</em></div>';
+      $('#card2024').innerHTML += rankHTML;
+    }
+
+    // Badge accanto al nome: Top 10% + Posizione (colore dinamico)
+    const _metaEl = $('#playerMeta');
+    if (_metaEl) {
+      // Top 10% nel ruolo basato su FM/MV 2024
+      const _tops = [];
+      if (fmStats24?.pct >= 0.90) _tops.push(`FM 2024 ${fmtPercent01(fmStats24.pct)}`);
+      if (mvStats24?.pct >= 0.90) _tops.push(`MV 2024 ${fmtPercent01(mvStats24.pct)}`);
+      if (_tops.length) {
+        _metaEl.insertAdjacentHTML(
+          'beforeend',
+          `<span class="badge good" title="${escapeHtml(_tops.join(' · '))}">Top 10% nel ruolo</span>`
+        );
+      }
+
+      // Badge posizione assoluta: FM/MV secondo preferenza (o migliore)
+      const bmPref = getBadgeMetric(); // 'fm' | 'mv' | 'best'
+      let picked = null;
+      if (bmPref==='fm' && fmStats24) picked = {label:'FM', rank: fmStats24.rank, N: fmStats24.N};
+      else if (bmPref==='mv' && mvStats24) picked = {label:'MV', rank: mvStats24.rank, N: mvStats24.N};
+      else {
+        const pos=[]; if (fmStats24) pos.push({label:'FM', rank: fmStats24.rank, N: fmStats24.N});
+        if (mvStats24) pos.push({label:'MV', rank: mvStats24.rank, N: mvStats24.N});
+        if (pos.length){ pos.sort((a,b)=>a.rank-b.rank); picked = pos[0]; }
+      }
+      if (picked){
+        const frac = picked.rank / picked.N;
+        const cls = (frac <= 0.10) ? 'good' : 'info'; // verde se Top 10%
+        const titleParts = [];
+        if (fmStats24) titleParts.push(`FM: ${fmStats24.rank}° su ${fmStats24.N}`);
+        if (mvStats24) titleParts.push(`MV: ${mvStats24.rank}° su ${mvStats24.N}`);
+        const title = titleParts.join(' · ');
+        _metaEl.insertAdjacentHTML('beforeend',
+          `<span class="badge ${cls}" title="${escapeHtml(title)}">${picked.rank}° su ${picked.N}</span>`);
+      }
+    }
+
   } else {
-    main24 = ['r','sq','aff','p','mvt','fmt','gf','gfr','rs','as','ag','a','e'];
+    $('#card2024').innerHTML = '<div class=small>Dati 2024 non disponibili.</div>';
   }
 
-  // Render standard 2024
-  $('#card2024').innerHTML = listKVctx(p24, main24, '2024');
-
-  // === NUOVO: percentile & z-score nel ruolo (2024) + badge Top 10% ===
-  const fmStats24 = computeRoleStats2024('fmt', p24?.fmt, r24);
-  const mvStats24 = computeRoleStats2024('mvt', p24?.mvt, r24);
-
-  // Sezione "Posizione nel ruolo (2024)"
-  let rankHTML = '';
-  if (fmStats24 || mvStats24) {
-    rankHTML += '<h4 class="sect">Posizione nel ruolo (2024)</h4>';
-    if (fmStats24) {
-      rankHTML += rowSimple('FM 2024 – Percentile', fmtPercent01(fmStats24.pct));
-      rankHTML += rowSimple('FM 2024 – Z\u200a-score', fmStats24.z);
-    }
-    if (mvStats24) {
-      rankHTML += rowSimple('MV 2024 – Percentile', fmtPercent01(mvStats24.pct));
-      rankHTML += rowSimple('MV 2024 – Z\u200a-score', mvStats24.z);
-    }
-    $('#card2024').innerHTML += rankHTML;
-  }
-
-  // Badge accanto al nome se Top 10% in almeno una metrica
-  const _metaEl = $('#playerMeta');
-  if (_metaEl) {
-    const _tops = [];
-    if (fmStats24?.pct >= 0.90) _tops.push(`FM 2024 ${fmtPercent01(fmStats24.pct)}`);
-    if (mvStats24?.pct >= 0.90) _tops.push(`MV 2024 ${fmtPercent01(mvStats24.pct)}`);
-    if (_tops.length) {
-      _metaEl.insertAdjacentHTML(
-        'beforeend',
-        `<span class="badge good" title="${escapeHtml(_tops.join(' · '))}">Top 10% nel ruolo</span>`
-      );
-    }
-  }
-} else {
-  $('#card2024').innerHTML = '<div class=small>Dati 2024 non disponibili.</div>';
-}
-
-
-  let srec=null; try{ if(!storico){ storico=await fetchJSON('storico.json') } srec=(storico||[]).find(x=>normCod(x.cod)===codN); if(srec){
+  let srec=null; try{
+    if(!storico){ storico=await fetchJSON('storico.json') }
+    srec=(storico||[]).find(x=>normCod(x.cod)===codN);
+    if(srec){
       const groups=getGroups();
       const {DATI_STAT, PER_PRES, FUTURES} = storicoSectionOrder();
       const part0rows = DATI_STAT.filter(k=> (k in srec) && !HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('');
@@ -258,47 +354,54 @@ async function selectPlayer(cod, idx){
       if(!groups.perPres){ hiddenRows += PER_PRES.filter(k=> (k in srec)&&!HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('') }
       if(!groups.futures){ hiddenRows += FUTURES.filter(k=> (k in srec)&&!HIDE_STORICO.has(k)).map(k=> rowKVctx(LABELS_STORICO[k]||k, srec[k], k, 'storico')).join('') }
       $('#cardHidden').innerHTML = hiddenRows || '<div class=small>Nessun campo nascosto.</div>';
-    } else { $('#cardStorico').innerHTML=`<div class=small>Nessun dato storico disponibile.</div>`; $('#cardHidden').innerHTML='<div class=small>Nessun dato storico disponibile.</div>'; }
-  }catch(e){ $('#cardStorico').innerHTML='<div class=small>Storico non disponibile.</div>'; $('#cardHidden').innerHTML=''; console.warn('Errore storico.json',e) }
+    } else {
+      $('#cardStorico').innerHTML=`<div class=small>Nessun dato storico disponibile.</div>`;
+      $('#cardHidden').innerHTML='';
+    }
+  }catch(e){
+    $('#cardStorico').innerHTML='<div class=small>Storico non disponibile.</div>';
+    $('#cardHidden').innerHTML='';
+    console.warn('Errore storico.json',e)
+  }
 
   addTopBadges(rec25,p24,srec);
 }
-// ===== Role stats 2024 (percentile & z-score) =====
-function computeRoleStats2024(metric, value, role){
-  try{
-    const v = Number(value);
-    const r = (role??'').toUpperCase();
-    if(!data2024 || !Number.isFinite(v) || !r) return null;
 
-    // Prendiamo tutti i valori della metrica nel medesimo ruolo dalla tabella 2024
+// ===== Role stats 2024 (cache + percentile & z-score) =====
+const ROLE_CACHE_2024 = {}; // role -> metric -> {vals,N,mean,std}
+function getRoleDist2024(role, metric){
+  const r=(role??'').toUpperCase();
+  if(!data2024||!r) return null;
+  if(!ROLE_CACHE_2024[r]) ROLE_CACHE_2024[r] = {};
+  if(!ROLE_CACHE_2024[r][metric]){
     const vals = data2024
-      .filter(rec => ((rec.r ?? rec.role ?? '').toUpperCase() === r))
+      .filter(rec => ((rec.r ?? rec.role ?? '').toUpperCase()===r))
       .map(rec => Number(rec[metric]))
       .filter(n => Number.isFinite(n))
       .sort((a,b)=>a-b);
-
     const N = vals.length;
-    if(!N) return null;
-
-    // Media e dev. standard (popolazione) per z-score
-    const mean = vals.reduce((a,b)=>a+b,0)/N;
-    const variance = vals.reduce((a,b)=>a + Math.pow(b-mean,2),0)/N;
+    const mean = N? vals.reduce((a,b)=>a+b,0)/N : 0;
+    const variance = N? vals.reduce((a,b)=>a + Math.pow(b-mean,2),0)/N : 0;
     const std = Math.sqrt(variance);
-
-    // Percentile midrank: gestisce i pari valorizzando a metà dell'intervallo
-    const eps = 1e-9;
-    let less=0, equal=0;
-    for(const x of vals){
-      if(x < v - eps) less++;
-      else if(Math.abs(x - v) <= eps) equal++;
-    }
-    const pct = (less + 0.5*equal)/N; // 0..1
-    const z = std>0 ? (v - mean)/std : 0;
-
-    return {pct, z, N, mean, std};
+    ROLE_CACHE_2024[r][metric] = {vals,N,mean,std};
+  }
+  return ROLE_CACHE_2024[r][metric];
+}
+function computeRoleStats2024(metric, value, role){
+  try{
+    const v=Number(value);
+    const distr = getRoleDist2024(role, metric);
+    if(!distr||!Number.isFinite(v)) return null;
+    const {vals,N,mean,std} = distr;
+    if(!N) return null;
+    const eps=1e-9; let less=0, equal=0;
+    for(const x of vals){ if(x < v - eps) less++; else if(Math.abs(x-v)<=eps) equal++; }
+    const pct=(less + 0.5*equal)/N;      // 0..1 (midrank)
+    const z= std>0 ? (v-mean)/std : 0;   // z-score
+    const rankMid = Math.max(1, Math.round( less + (equal ? (equal+1)/2 : 1 ) )); // posizione k
+    return {pct, z, N, mean, std, rank: rankMid};
   }catch{ return null; }
 }
-
 function rowSimple(label, value){
   const display = (typeof value === 'number') ? fmtValue(value) : String(value);
   return `<div class="row"><span class="key">${escapeHtml(label)}</span><span class="val">${display}</span></div>`;
