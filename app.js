@@ -207,7 +207,7 @@ async function selectPlayer(cod, idx){
 }
 
 // ===== Shortcuts =====
-document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){ const el=$('#searchInput'); if(el){ e.preventDefault(); el.focus(); el.select?.(); showResults() } } });
+document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&(e.key==='q'||e.key==='Q')){ const el=$('#searchInput'); if(el){ e.preventDefault(); el.focus(); el.select?.(); showResults() } } });
 
 // ===== Init =====
 (async function init(){ try{ await loadIndex() }catch(e){ console.warn(e) } setupTheme(); setupToggles(); buildOptionsUI(); })();
